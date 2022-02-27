@@ -11,6 +11,8 @@ class DBHandler():
         self.db_name = db_name
         self.conn = sql.connect(self.db_name)
         self.cursor = self.conn.cursor()
+        self.create_default_tables()
+        self.static_inserts()
 
     def create_default_tables(self):
         q = """  
@@ -66,23 +68,28 @@ class DBHandler():
         """
         Inserts events into the database
         """
-        events = fpl.get_static_data("events")
-        for event in events:
+        try:
+            events = fpl.get_static_data("events")
+            event = [e for e in events if e["is_current"] == 1]
+            event = event[0]
+
             event["top_element_info_id"] = event["top_element_info"]["id"]
             event["top_element_info_points"] = event["top_element_info"]["points"]
             event.pop("top_element_info")
+
+        except IndexError:
+            print("No current events")
+            return
         with self.conn:
             try:
-                self.conn.executemany("""INSERT INTO events_static VALUES (:id, :average_entry_score, :data_checked, :deadline_time, :finished, 
+                self.conn.execute("""INSERT INTO events_static VALUES (:id, :average_entry_score, :data_checked, :deadline_time, :finished, 
                                                                         :highest_score, :is_current, :is_next, :is_previous, :most_captained, 
                                                                         :most_selected, :most_transferred_in, :most_vice_captained, :name, :top_element, 
-                                                                        :top_element_info_id, :top_element_info_points, :transfers_made)""", events)
+                                                                        :top_element_info_id, :top_element_info_points, :transfers_made)""", event)
             except sql.IntegrityError:
                 print("Event already inserted")
         
 if __name__ == "__main__":
     db = DBHandler()
-    db.create_default_tables()
-    db.static_inserts()
     db.update_events()
     db.conn.close()
