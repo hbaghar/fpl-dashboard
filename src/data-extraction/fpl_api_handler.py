@@ -22,7 +22,11 @@ def get_static_data(key):
     URL = "https://fantasy.premierleague.com/api/bootstrap-static/"
     data = get_json_data(URL)
     
-    return pd.json_normalize(data[key])
+    #Keeping data till current GW (might have to change to get data only for current GW)
+    if key == "events":
+        data["events"] = [event for event in data["events"] if event["is_current"] == True or event["finished"] == True]
+
+    return data[key]
 
 def get_fixtures():
     """
@@ -39,7 +43,7 @@ def get_fixtures():
         for key in keys_to_remove:
             fixture.pop(key)
 
-    return pd.json_normalize(data)
+    return data
 
 def get_player_info(element_id, key):
     """
@@ -54,7 +58,7 @@ def get_player_info(element_id, key):
 
     data = data[key]
 
-    return pd.json_normalize(data)
+    return data
 
 def get_manager_squad(manager_id, gw):
     """
@@ -63,7 +67,7 @@ def get_manager_squad(manager_id, gw):
     URL = f"https://fantasy.premierleague.com/api/entry/{manager_id}/event/{gw}/picks/"
     data = get_json_data(URL)
     data = data["picks"]
-    return pd.json_normalize(data)
+    return data
 
 def get_manager_info(manager_id):
     """
@@ -74,3 +78,18 @@ def get_manager_info(manager_id):
     data.pop("leagues")
     
     return data
+
+if __name__ == "__main__":
+    #Running tests
+    import json
+    print(json.dumps(get_static_data("events")[1], indent=4, sort_keys=True))
+    print(json.dumps(get_static_data("teams")[1], indent=4, sort_keys=True))
+    print(json.dumps(get_static_data("elements")[1], indent=4, sort_keys=True))
+    print(json.dumps(get_static_data("element_types")[1], indent=4, sort_keys=True))
+    print(json.dumps(get_static_data("element_stats")[1], indent=4, sort_keys=True))
+    print(json.dumps(get_fixtures()[1], indent=4, sort_keys=True))
+    print(json.dumps(get_player_info(1, "history")[1], indent=4, sort_keys=True))
+    print(json.dumps(get_player_info(1, "fixtures")[1], indent=4, sort_keys=True))
+    print(json.dumps(get_manager_squad(1, 1)[1], indent=4, sort_keys=True))
+    print(json.dumps(get_manager_info(1), indent=4, sort_keys=True))
+    
