@@ -1,4 +1,5 @@
 import sqlite3 as sql
+from tqdm import tqdm
 import fpl_api_handler as fpl
 class DBHandler():
     """
@@ -46,7 +47,7 @@ class DBHandler():
                                                         red_cards INTEGER, round INTEGER, saves INTEGER, selected INTEGER, team_a_score INTEGER, 
                                                         team_h_score INTEGER, threat DOUBLE, total_points INTEGER, transfers_balance INTEGER, transfers_in INTEGER, 
                                                         transfers_out INTEGER, value INTEGER, was_home TEXT, yellow_cards INTEGER,
-                                                        PRIMARY KEY (element, round), FOREIGN KEY(element) REFERENCES players(id), FOREIGN KEY(fixture) REFERENCES fixtures(id));"""
+                                                        CONSTRAINT player_week_fixture PRIMARY KEY (element, round, fixture), FOREIGN KEY(element) REFERENCES players(id), FOREIGN KEY(fixture) REFERENCES fixtures(id));"""
         
         self.cursor.executescript(q)
         self.conn.commit()
@@ -64,8 +65,10 @@ class DBHandler():
         """
         columns = self.get_table_columns(table_name)
         insert_query = f"INSERT INTO {table_name} VALUES (:{', :'.join(columns)})"
-        columns.remove(pk)
-        update_query = f"UPDATE {table_name} SET " + ", ".join([f"{column} = :{column}" for column in columns]) +  f" WHERE {pk} = :{pk}"
+        for key in pk:
+            columns.remove(key)
+        update_query = f"UPDATE {table_name} SET " + ", ".join([f"{column} = :{column}" for column in columns]) + \
+                      " WHERE "+ " AND ".join([f"{k} = :{k}" for k in pk])
 
         return insert_query, update_query
 
@@ -92,7 +95,7 @@ class DBHandler():
         """
         Inserts/updates events into the events_static table at a fixed frequency during the season
         """
-        insert_query, update_query = self.get_update_and_insert_query("events_static", "id")
+        insert_query, update_query = self.get_update_and_insert_query("events_static", ["id"])
         try:
             # TO-DO: if table is empty, insert all events
             events = fpl.get_static_data("events")
@@ -131,7 +134,7 @@ class DBHandler():
             print("No fixtures")
             return
         
-        insert_query, update_query = self.get_update_and_insert_query("fixtures", "id")
+        insert_query, update_query = self.get_update_and_insert_query("fixtures", ["id"])
 
         with self.conn:
             try:
@@ -150,7 +153,8 @@ class DBHandler():
         except IndexError:
             print("No players")
             return
-        insert_query, update_query = self.get_update_and_insert_query("players_static", "id")
+        
+        insert_query, update_query = self.get_update_and_insert_query("players_static", ["id"])
 
         with self.conn:
             try:
@@ -162,11 +166,41 @@ class DBHandler():
                 self.conn.executemany(update_query, players)
     
     def update_player_gw_detailed(self):
-        pass
+        
+        self.cursor.execute("SELECT id from events_static WHERE is_current = 1")
+        current_gw = self.cursor.fetchone()[0]
+
+        self.cursor.execute("SELECT COUNT(*) FROM player_gw_detailed")
+        table_records = self.cursor.fetchone()[0]
+        self.cursor.execute("SELECT id FROM players_static")
+        
+        for player in tqdm(self.cursor.fetchall()):
+            history = fpl.get_player_info(player[0], "history")
+            insert_query, update_query = self.get_update_and_insert_query("player_gw_detailed", ["element", "round", "fixture"])
+            if table_records == 0:
+                with self.conn:
+                    try:
+                        self.conn.executemany(insert_query, history)
+                    except:
+                        print("Player id: ", player[0])
+                        raise Exception
+            else:
+                #Performing update for latest gw if player has already been inserted
+                history = [h for h in history if h["round"] == current_gw]
+                with self.conn:
+                    try:
+                        self.conn.executemany(insert_query, history)
+                    except sql.IntegrityError:
+                        self.conn.executemany(update_query, history)
+                    except:
+                        print("Player id: ", player[0])
+                        raise Exception
+            
 
 if __name__ == "__main__":
     db = DBHandler()
     db.update_events()
     db.update_fixtures()
     db.update_player_static()
+    db.update_player_gw_detailed()
     db.conn.close()
