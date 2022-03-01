@@ -92,27 +92,32 @@ class DBHandler():
         """
         Inserts/updates events into the events_static table at a fixed frequency during the season
         """
+        insert_query, update_query = self.get_update_and_insert_query("events_static", "id")
         try:
+            # TO-DO: if table is empty, insert all events
             events = fpl.get_static_data("events")
-            event = [e for e in events if e["is_current"] == 1][0]
+            self.cursor.execute("SELECT COUNT(*) FROM events_static")
+            if self.cursor.fetchone()[0] == 0:
+                pass
+            else:
+                events = [e for e in events if e["is_current"] == 1]
 
-            event["top_element_info_id"] = event["top_element_info"]["id"]
-            event["top_element_info_points"] = event["top_element_info"]["points"]
-            event.pop("top_element_info")
+            for event in events:
+                event["top_element_info_id"] = event["top_element_info"]["id"]
+                event["top_element_info_points"] = event["top_element_info"]["points"]
+                event.pop("top_element_info")
 
         except IndexError:
             print("No current events")
             return
-        
-        insert_query, update_query = self.get_update_and_insert_query("events_static", "id")
 
         with self.conn:
             try:
-                self.conn.execute(insert_query, event)
+                self.conn.executemany(insert_query, events)
             except sql.IntegrityError:
                 print("Event already inserted, performing update")
                 self.conn.rollback()
-                self.conn.execute(update_query, event)
+                self.conn.executemany(update_query, events)
 
     def update_fixtures(self):
         """
@@ -155,6 +160,9 @@ class DBHandler():
                 print("Players already inserted, performing update")
                 self.conn.rollback()
                 self.conn.executemany(update_query, players)
+    
+    def update_player_gw_detailed(self):
+        pass
 
 if __name__ == "__main__":
     db = DBHandler()
