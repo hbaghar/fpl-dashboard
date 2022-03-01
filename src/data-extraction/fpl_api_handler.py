@@ -10,7 +10,7 @@ def get_json_data(url):
 
 def get_static_data(key):
     """
-    Get requested data key from bootstrap-static endpoint in dataframe format.
+    Get requested data key from bootstrap-static endpoint
 
     Useful keys:
     - teams
@@ -30,7 +30,7 @@ def get_static_data(key):
 
 def get_fixtures():
     """
-    Get all upcoming fixtures from the fixtures endpoint in dataframe format.
+    Get all upcoming fixtures from the fixtures endpoint
     """
     URL = "https://fantasy.premierleague.com/api/fixtures/"
     data = get_json_data(URL)
@@ -47,7 +47,7 @@ def get_fixtures():
 
 def get_player_info(element_id, key):
     """
-    Get player history from the element_history endpoint in dataframe format.
+    Get player history from the element-summary endpoint
 
     Possible keys:
     - history
@@ -71,7 +71,7 @@ def get_manager_squad(manager_id, gw):
 
 def get_manager_info(manager_id):
     """
-    Get info for a praticular manager from the element_summary endpoint in dataframe format.
+    Get info for a praticular manager from the entry endpoint
     """
     URL = f"https://fantasy.premierleague.com/api/entry/{manager_id}/"
     data = get_json_data(URL)
