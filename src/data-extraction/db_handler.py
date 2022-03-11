@@ -1,13 +1,17 @@
 from functools import partial
 import sqlite3 as sql
 from tqdm import tqdm
-from itertools import repeat
 import fpl_api_handler as fpl
 from multiprocessing import Pool
 class DBHandler():
     """
     Class with methods to create a database and perform operations on it exclusively related to FPL API
     """
+
+    # TO-DO:
+    # - Add method/script for team updates
+    # - Add method/script for archiving player data at end of season (need for stats analysis)
+    # - Add method/script for deleting old data
     
     def __init__(self, db_name = "data/FPL_DB.db"):
         self.db_name = db_name
@@ -67,9 +71,9 @@ class DBHandler():
         """
         insert_query, update_query = self.get_update_and_insert_query("events_static", ["id"])
         try:
-            # TO-DO: if table is empty, insert all events
             events = fpl.get_static_data("events")
             self.cursor.execute("SELECT COUNT(*) FROM events_static")
+            # If zero records insert all events else only current and previous (need to make this failure proof)
             if self.cursor.fetchone()[0] == 0:
                 pass
             else:
