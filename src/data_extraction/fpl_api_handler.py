@@ -1,5 +1,4 @@
 import requests
-import pandas as pd
 
 def get_json_data(url):
     """

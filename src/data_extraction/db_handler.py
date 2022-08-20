@@ -4,12 +4,14 @@ from tqdm import tqdm
 import fpl_api_handler as fpl
 from multiprocessing import Pool
 import os
-class DBHandler():
+
+
+class DBHandler:
     """
     Class with methods to create a database and perform operations on it
     """
-    
-    def __init__(self, db_name = "data/FPL_DB.db"):
+
+    def __init__(self, db_name="data/FPL_DB.db"):
         self.db_name = db_name
         self.conn = sql.connect(self.db_name)
         self.cursor = self.conn.cursor()
@@ -17,7 +19,7 @@ class DBHandler():
     def create_default_tables(self):
         with open("src/data_extraction/create_tables.sql", "r") as f:
             self.cursor.executescript(f.read())
-    
+
     def get_table_columns(self, table_name):
         """
         Returns a list of all columns in a table
@@ -33,7 +35,7 @@ class DBHandler():
 
         columns = self.get_table_columns(table_name)
         insert_query = f"INSERT INTO {table_name} VALUES (:{', :'.join(columns)})"
-        
+
         return insert_query
 
     def static_inserts(self):
@@ -46,10 +48,19 @@ class DBHandler():
         metric_names_static = fpl.get_static_data("element_stats")
 
         with self.conn:
-            self.conn.executemany("INSERT INTO teams_static VALUES (:id, :name, :code, :short_name)", teams_static)
-            self.conn.executemany("INSERT INTO positions_static VALUES (:id, :singular_name_short, :squad_max_play, :squad_min_play)", positions_static)
-            self.conn.executemany("INSERT INTO metric_names_static VALUES (:name, :label)", metric_names_static)
-    
+            self.conn.executemany(
+                "INSERT INTO teams_static VALUES (:id, :name, :code, :short_name)",
+                teams_static,
+            )
+            self.conn.executemany(
+                "INSERT INTO positions_static VALUES (:id, :singular_name_short, :squad_max_play, :squad_min_play)",
+                positions_static,
+            )
+            self.conn.executemany(
+                "INSERT INTO metric_names_static VALUES (:name, :label)",
+                metric_names_static,
+            )
+
     def create_events(self):
         """
         Inserts events into the events_static table
@@ -81,7 +92,7 @@ class DBHandler():
         except IndexError:
             print("No fixtures")
             return
-        
+
         insert_query = self.get_insert_query("fixtures")
 
         with self.conn:
@@ -97,12 +108,12 @@ class DBHandler():
         except IndexError:
             print("No players")
             return
-        
+
         insert_query = self.get_insert_query("players_static")
 
         with self.conn:
             self.conn.executemany(insert_query, players)
-    
+
     def create_player_gw_detailed(self):
         """
         Updates player_gw_detailed table with player data for each gameweek
@@ -110,7 +121,7 @@ class DBHandler():
 
         print("Fetching player detailed info...")
         self.cursor.execute("SELECT id FROM players_static")
-        
+
         players = self.cursor.fetchall()
         players = [p[0] for p in players]
 
@@ -119,7 +130,9 @@ class DBHandler():
         history = []
         with Pool(8) as p:
             with tqdm(total=len(players)) as pbar:
-                for i, data in enumerate(p.imap(partial(fpl.get_player_info, key="history"), players)) :
+                for i, data in enumerate(
+                    p.imap(partial(fpl.get_player_info, key="history"), players)
+                ):
                     history.append(data)
                     pbar.update()
 
@@ -130,7 +143,7 @@ class DBHandler():
                 except:
                     print("Error inserting player", player[0]["element"])
                     raise Exception
-            
+
 
 def build_db_tables():
     os.remove("data/FPL_DB.db")
@@ -141,6 +154,7 @@ def build_db_tables():
     db.create_player_static()
     db.create_player_gw_detailed()
     db.conn.close()
+
 
 if __name__ == "__main__":
     build_db_tables()
