@@ -33,3 +33,5 @@ CREATE TABLE IF NOT EXISTS player_gw_detailed (element INTEGER, assists INTEGER,
                                                         team_h_score INTEGER, threat DOUBLE, total_points INTEGER, transfers_balance INTEGER, transfers_in INTEGER, 
                                                         transfers_out INTEGER, value INTEGER, was_home TEXT, yellow_cards INTEGER,
                                                         CONSTRAINT player_week_fixture PRIMARY KEY (element, round, fixture), FOREIGN KEY(element) REFERENCES players(id), FOREIGN KEY(fixture) REFERENCES fixtures(id));
+
+                                                        
