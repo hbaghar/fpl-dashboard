@@ -13,10 +13,9 @@ class DBHandler():
         self.db_name = db_name
         self.conn = sql.connect(self.db_name)
         self.cursor = self.conn.cursor()
-        self.create_default_tables()
 
     def create_default_tables(self):
-        with open("src/data-extraction/create_tables.sql", "r") as f:
+        with open("src/data_extraction/create_tables.sql", "r") as f:
             self.cursor.executescript(f.read())
     
     def get_table_columns(self, table_name):
@@ -133,11 +132,15 @@ class DBHandler():
                     raise Exception
             
 
-if __name__ == "__main__":
+def build_db_tables():
     os.remove("data/FPL_DB.db")
     db = DBHandler()
+    db.create_default_tables()
     db.create_events()
     db.create_fixtures()
     db.create_player_static()
     db.create_player_gw_detailed()
     db.conn.close()
+
+if __name__ == "__main__":
+    build_db_tables()
