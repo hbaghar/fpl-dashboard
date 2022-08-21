@@ -1,7 +1,7 @@
 CREATE VIEW PLAYER_TABULAR_VIEW AS
 SELECT
     player.web_name,
-    position.singular_name_short,
+    position.singular_name_short AS position,
     team.short_name AS team_name,
     player.total_points,
     player.now_cost,
@@ -10,9 +10,13 @@ SELECT
     player.goals_scored,
     player.assists,
     player.goals_scored + player.assists AS goal_contribution,
+    player.goals_scored/player.minutes*90 AS goals_per_90,
+    player.assists/player.minutes*90 AS assists_per_90,
+    (player.goals_scored + player.assists)/player.minutes*90 AS goal_contribution_per_90,
     player.form,
     player.clean_sheets,
     player.goals_conceded,
+    player.goals_conceded/player.minutes*90 AS goals_conceded_per_90,
     player.own_goals,
     player.penalties_saved,
     player.penalties_missed,
