@@ -144,6 +144,14 @@ class DBHandler:
                     print("Error inserting player", player[0]["element"])
                     raise Exception
 
+    def create_views(self):
+        """
+        Creates views for the database
+        """
+
+        with open("src/data_extraction/create_views.sql", "r") as f:
+            self.cursor.executescript(f.read())
+
 
 def build_db_tables():
     try:
@@ -152,10 +160,12 @@ def build_db_tables():
         pass
     db = DBHandler()
     db.create_default_tables()
+    db.static_inserts()
     db.create_events()
     db.create_fixtures()
     db.create_player_static()
     db.create_player_gw_detailed()
+    db.create_views()
     db.conn.close()
 
 
