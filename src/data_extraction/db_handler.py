@@ -146,7 +146,10 @@ class DBHandler:
 
 
 def build_db_tables():
-    os.remove("data/FPL_DB.db")
+    try:
+        os.remove("data/FPL_DB.db")
+    except FileNotFoundError:
+        pass
     db = DBHandler()
     db.create_default_tables()
     db.create_events()
