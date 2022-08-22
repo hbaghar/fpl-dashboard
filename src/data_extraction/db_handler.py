@@ -1,7 +1,7 @@
 from functools import partial
 import sqlite3 as sql
 from tqdm import tqdm
-import data_extraction.fpl_api_handler as fpl
+import src.data_extraction.fpl_api_handler as fpl
 from multiprocessing import Pool
 import os
 
