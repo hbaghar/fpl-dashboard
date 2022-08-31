@@ -4,7 +4,7 @@ SELECT
     position.singular_name_short AS position,
     team.short_name AS team_name,
     player.total_points,
-    player.now_cost,
+    player.now_cost*1.0/10 AS now_cost,
     player.selected_by_percent,
     player.event_points,
     player.goals_scored,

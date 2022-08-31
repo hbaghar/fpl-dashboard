@@ -50,11 +50,17 @@ app.layout = html.Div(
                 "padding": "15px",
             },
             sort_action="native",
-            sort_mode="multi",
+            sort_mode="single",
+            sort_by=[{"column_id": "total_points", "direction": "desc"}],
             fixed_columns={"headers": True, "data": 3},
-            style_cell={"minWidth": "150px", "width": "150px", "maxWidth": "150px"},
+            style_cell={"minWidth": "150px", "maxWidth": "180px"},
             style_data_conditional=styles_fixtures,
             style_header={"backgroundColor": "#f1f6ff", "fontWeight": "bold"},
+            columns=[
+                {"name": config["column_names"][i], "id": i}
+                for i in config["column_names"].keys()
+            ],
+            hidden_columns=config["all_players_hidden_columns"],
         ),
     ]
 )
