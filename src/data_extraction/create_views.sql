@@ -10,13 +10,21 @@ SELECT
     player.goals_scored,
     player.assists,
     player.goals_scored + player.assists AS goal_contribution,
-    ROUND(player.goals_scored*1.0/player.minutes*90,3) AS goals_per_90,
-    ROUND(player.assists*1.0/player.minutes*90,3) AS assists_per_90,
-    ROUND((player.goals_scored + player.assists)*1.0/player.minutes*90,3) AS goal_contribution_per_90,
+    CASE WHEN player.goals_scored=0 THEN 0
+        ELSE ROUND(player.goals_scored*1.0/player.minutes*90,3) 
+    END AS goals_per_90,
+    CASE WHEN player.assists=0 THEN 0
+        ELSE ROUND(player.assists*1.0/player.minutes*90,3) 
+    END AS assists_per_90,
+    CASE WHEN player.goals_scored+player.assists = 0 THEN 0
+        ELSE  ROUND((player.goals_scored + player.assists)*1.0/player.minutes*90,3) 
+    END AS goal_contribution_per_90,
     player.form,
     player.clean_sheets,
     player.goals_conceded,
-    ROUND(player.goals_conceded*1.0/player.minutes*90,3) AS goals_conceded_per_90,
+    CASE WHEN player.goals_conceded=0 THEN 0
+        ELSE ROUND(player.goals_conceded*1.0/player.minutes*90,3) 
+    END AS goals_conceded_per_90,   
     player.own_goals,
     player.penalties_saved,
     player.penalties_missed,
@@ -33,7 +41,9 @@ SELECT
     player.value_form,
     player.value_season,
     player.points_per_game,
-    player.chance_of_playing_this_round
+    CASE WHEN player.chance_of_playing_this_round IS NOT NULL THEN player.chance_of_playing_this_round 
+        ELSE 100 
+    END AS chance_of_playing_this_round
 FROM
     players_static player
     INNER JOIN teams_static team ON player.team = team.id
