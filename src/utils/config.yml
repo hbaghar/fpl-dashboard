@@ -1,5 +1,5 @@
 ---
-midfielder_stats_table_columns:
+column_names:
   {
     "web_name": "Player Name",
     "position": "Position",
@@ -12,122 +12,74 @@ midfielder_stats_table_columns:
     "assists": "Assists",
     "goal_contribution": "Goals+Assists",
     "minutes": "Minutes Played",
-    "goals_per_90": "Goals per 90 min",
-    "assists_per_90": "Assists per 90 min",
-    "goal_contribution_per_90": "G+A per 90 min",
+    "goals_per_90": "Goals/90 min",
+    "assists_per_90": "Assists/90 min",
+    "goal_contribution_per_90": "G+A/90 min",
     "form": "Form",
     "clean_sheets": "Clean Sheets",
     "penalties_missed": "Penalties Missed",
-    "yellow_cards": "Yellow Cards",
-    "red_cards": "Red Cards",
-    "bonus": "Bonus Points",
-    "bps": "BPS",
-    "influence": "Influence",
-    "creativity": "Creativity",
-    "threat": "Threat",
-    "ict_index": "ICT Index",
-    "value_form": "Points/Form",
-    "value_season": "Points per Million",
-    "points_per_game": "Points per Game",
-    "chance_of_playing_this_round": "Chance of Playing",
-  }
-
-defender_stats_table_columns:
-  {
-    "web_name": "Player Name",
-    "position": "Position",
-    "team_name": "Team",
-    "total_points": "Total Points",
-    "now_cost": "Current Price",
-    "selected_by_percent": "Selected by %",
-    "event_points": "Round Points",
-    "goals_scored": "Goals",
-    "assists": "Assists",
-    "goal_contribution": "Goals+Assists",
-    "minutes": "Minutes Played",
-    "goals_per_90": "Goals per 90 min",
-    "assists_per_90": "Assists per 90 min",
-    "goal_contribution_per_90": "G+A per 90 min",
-    "form": "Form",
-    "clean_sheets": "Clean Sheets",
     "goals_conceded": "Goals Conceded",
-    "goals_conceded_per_90": "Goals Conceded per 90 min",
-    "own_goals": "Own Goals",
-    "penalties_missed": "Penalties Missed",
-    "yellow_cards": "Yellow Cards",
-    "red_cards": "Red Cards",
-    "saves": "Saves",
-    "bonus": "Bonus Points",
-    "bps": "BPS",
-    "influence": "Influence",
-    "creativity": "Creativity",
-    "threat": "Threat",
-    "ict_index": "ICT Index",
-    "value_form": "Points/Form",
-    "value_season": "Points per Million",
-    "points_per_game": "Points per Game",
-    "chance_of_playing_this_round": "Chance of Playing",
-  }
-
-attacker_stats_table_columns:
-  {
-    "web_name": "Player Name",
-    "position": "Position",
-    "team_name": "Team",
-    "total_points": "Total Points",
-    "now_cost": "Current Price",
-    "selected_by_percent": "Selected by %",
-    "event_points": "Round Points",
-    "goals_scored": "Goals",
-    "assists": "Assists",
-    "goal_contribution": "Goals+Assists",
-    "minutes": "Minutes Played",
-    "goals_per_90": "Goals per 90 min",
-    "assists_per_90": "Assists per 90 min",
-    "goal_contribution_per_90": "G+A per 90 min",
-    "form": "Form",
-    "penalties_missed": "Penalties Missed",
-    "yellow_cards": "Yellow Cards",
-    "red_cards": "Red Cards",
-    "bonus": "Bonus Points",
-    "bps": "BPS",
-    "influence": "Influence",
-    "creativity": "Creativity",
-    "threat": "Threat",
-    "ict_index": "ICT Index",
-    "value_form": "Points/Form",
-    "value_season": "Points per Million",
-    "points_per_game": "Points per Game",
-    "chance_of_playing_this_round": "Chance of Playing",
-  }
-
-gk_stats_table_columns:
-  {
-    "web_name": "Player Name",
-    "position": "Position",
-    "team_name": "Team",
-    "total_points": "Total Points",
-    "now_cost": "Current Price",
-    "selected_by_percent": "Selected by %",
-    "event_points": "Round Points",
-    "minutes": "Minutes Played",
-    "form": "Form",
-    "clean_sheets": "Clean Sheets",
-    "goals_conceded": "Goals Conceded",
-    "goals_conceded_per_90": "Goals Conceded per 90 min",
+    "goals_conceded_per_90": "Goals Conceded/90 min",
     "own_goals": "Own Goals",
     "penalties_saved": "Penalties Saved",
+    "saves": "Saves",
+    "value_form": "Points/Form",
+    "value_season": "Points/Million",
+    "points_per_game": "Points/Game",
     "yellow_cards": "Yellow Cards",
     "red_cards": "Red Cards",
-    "saves": "Saves",
     "bonus": "Bonus Points",
     "bps": "BPS",
     "influence": "Influence",
     "creativity": "Creativity",
     "threat": "Threat",
     "ict_index": "ICT Index",
-    "value_form": "Points/Form",
-    "value_season": "Points per Million",
-    "points_per_game": "Points per Game",
-    "chance_of_playing_this_round": "Chance of Playing",
+    "opponent_1": "Next Fixture 1",
+    "opponent_2": "Next Fixture 2",
+    "opponent_3": "Next Fixture 3",
+    "opponent_4": "Next Fixture 4",
+    "opponent_5": "Next Fixture 5",
   }
+
+all_players_hidden_columns:
+  [
+    "chance_of_playing_this_round",
+    "fixture_difficulty_1",
+    "fixture_difficulty_2",
+    "fixture_difficulty_3",
+    "fixture_difficulty_4",
+    "fixture_difficulty_5",
+  ]
+
+mid_hidden_columns:
+  [
+    "goals_conceded",
+    "goals_conceded_per_90",
+    "own_goals",
+    "saves",
+    "penalties_saved",
+  ]
+
+def_hidden_columns: ["saves", "penalties_saved"]
+
+fwd_hidden_columns:
+  [
+    "clean_sheets",
+    "goals_conceded",
+    "goals_conceded_per_90",
+    "own_goals",
+    "saves",
+    "penalties_saved",
+  ]
+
+gkp_hidden_columns:
+  [
+    "goals_scored",
+    "assists",
+    "goal_contribution",
+    "goals_per_90",
+    "assists_per_90",
+    "goal_contribution_per_90",
+    "penalties_missed",
+  ]
+position_options: ["All", "GKP", "DEF", "MID", "FWD"]
