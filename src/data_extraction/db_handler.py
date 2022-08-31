@@ -17,7 +17,7 @@ class DBHandler:
         self.cursor = self.conn.cursor()
 
     def create_default_tables(self):
-        with open("src/data_extraction/create_tables.sql", "r") as f:
+        with open("src/data_extraction/queries/create_tables.sql", "r") as f:
             self.cursor.executescript(f.read())
 
     def get_table_columns(self, table_name):
@@ -149,7 +149,7 @@ class DBHandler:
         Creates views for the database
         """
 
-        with open("src/data_extraction/create_views.sql", "r") as f:
+        with open("src/data_extraction/queries/create_views.sql", "r") as f:
             self.cursor.executescript(f.read())
 
 
