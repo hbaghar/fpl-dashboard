@@ -28,6 +28,14 @@ class DBHandler:
         self.cursor.execute(f"PRAGMA table_info({table_name})")
         return [row[1] for row in self.cursor.fetchall()]
 
+    def get_unique_values_in_table_column(self, table_name, column_name):
+        """
+        Returns a list of all values in a column in a table
+        """
+
+        self.cursor.execute(f"SELECT DISTINCT {column_name} FROM {table_name}")
+        return [row[0] for row in self.cursor.fetchall()]
+
     def get_insert_query(self, table_name):
         """
         Returns a query string to update or insert rows in a table
