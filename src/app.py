@@ -73,7 +73,6 @@ app.layout = html.Div(
                             {
                                 "name": config["column_names"][i],
                                 "id": i,
-                                "deletable": True,
                             }
                             for i in config["column_names"].keys()
                         ],
@@ -87,13 +86,45 @@ app.layout = html.Div(
                         html.H5("Position"),
                         dcc.Dropdown(
                             id="position_dropdown",
-                            options=config["position_options"],
-                            value="All",
-                            clearable=False,
+                            options=db.get_unique_values_in_table_column(
+                                "positions_static", "singular_name_short"
+                            ),
+                            placeholder="All",
+                        ),
+                        html.H5("Team"),
+                        dcc.Dropdown(
+                            id="team_dropdown",
+                            options=db.get_unique_values_in_table_column(
+                                "teams_static", "short_name"
+                            ),
+                            placeholder="All",
+                            multi=True,
+                        ),
+                        html.H5("Minutes Played"),
+                        dcc.RangeSlider(
+                            id="minutes_played_slider",
+                            min=0,
+                            max=df.minutes.max(),
+                            value=[0, df.minutes.max()],
+                        ),
+                        html.H5("Price Range"),
+                        dcc.RangeSlider(
+                            id="price_range_slider",
+                            min=df.now_cost.min(),
+                            max=df.now_cost.max(),
+                            value=[df.now_cost.min(), df.now_cost.max()],
+                        ),
+                        dbc.Button(
+                            "Reset Filters",
+                            id="reset_button",
+                            color="danger",
                         ),
                     ],
                     width=2,
-                    style={"border": "1px solid #f1f6ff", "padding": "5px"},
+                    style={
+                        "border": "1px solid #f1f6ff",
+                        "padding": "5px",
+                    },
                 ),
             ],
             style={"padding": "10px"},
@@ -106,16 +137,43 @@ app.layout = html.Div(
     Output("player_table", "data"),
     Output("player_table", "hidden_columns"),
     Input("position_dropdown", "value"),
+    Input("team_dropdown", "value"),
+    Input("minutes_played_slider", "value"),
+    Input("price_range_slider", "value"),
 )
-def update_player_table(position):
-    if position == "All":
-        return df.to_dict("records"), config["all_players_hidden_columns"]
-    else:
-        hide_cols = (
-            config["all_players_hidden_columns"]
-            + config[position.lower() + "_hidden_columns"]
-        )
-        return df[df["position"] == position].to_dict("records"), hide_cols
+def update_player_table(
+    position_dropdown_value,
+    team_dropdown_value,
+    minutes_played_slider_value,
+    price_range_slider_value,
+):
+    hide_cols = config["all_players_hidden_columns"]
+    dff = df.copy()
+    if position_dropdown_value != None:
+        dff = dff[dff.position == position_dropdown_value]
+        hide_cols += config[position_dropdown_value.lower() + "_hidden_columns"]
+    if team_dropdown_value != [] and team_dropdown_value != None:
+        dff = dff[dff.team_name.isin(team_dropdown_value)]
+    dff = dff[
+        (dff.minutes >= minutes_played_slider_value[0])
+        & (dff.minutes <= minutes_played_slider_value[1])
+    ]
+    dff = dff[
+        (dff.now_cost >= price_range_slider_value[0])
+        & (dff.now_cost <= price_range_slider_value[1])
+    ]
+    return dff.to_dict("records"), hide_cols
+
+
+@app.callback(
+    Output("position_dropdown", "value"),
+    Output("team_dropdown", "value"),
+    Output("minutes_played_slider", "value"),
+    Output("price_range_slider", "value"),
+    Input("reset_button", "n_clicks"),
+)
+def reset_filters(n_clicks):
+    return None, [], [0, df.minutes.max()], [df.now_cost.min(), df.now_cost.max()]
 
 
 if __name__ == "__main__":
