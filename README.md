@@ -12,7 +12,8 @@ This repository contains code to load data from the FPL API into a SQLite Databa
 3. Setup `miniconda` environment from `environment.yml` file by running (requires [`miniconda`](https://docs.conda.io/en/latest/miniconda.html) installation):
 
     ```{bash}
-    conda create -f environment.yml
+    conda env create -f environment.yml
+    conda activate fpl-db-py39
     ```
 
 4. Run the following to make all modules discoverable:
