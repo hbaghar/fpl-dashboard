@@ -1,11 +1,10 @@
-from dash import Dash, dcc, html, dash_table as dt
+from dash import Dash, dcc, html, dash_table as dt, Input, Output
 import dash_bootstrap_components as dbc
 import plotly.express as px
 import pandas as pd
 from yaml import safe_load
 from src.data_extraction import db_handler as dbh
 from src.utils import data_table_module as dtm
-from dash.dependencies import Input, Output
 
 db = dbh.DBHandler()
 
