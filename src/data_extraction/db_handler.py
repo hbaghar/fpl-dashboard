@@ -79,8 +79,14 @@ class DBHandler:
             events = fpl.get_static_data("events")
 
             for event in events:
-                event["top_element_info_id"] = event["top_element_info"]["id"]
-                event["top_element_info_points"] = event["top_element_info"]["points"]
+                try:
+                    event["top_element_info_id"] = event["top_element_info"]["id"]
+                    event["top_element_info_points"] = event["top_element_info"][
+                        "points"
+                    ]
+                except TypeError:
+                    event["top_element_info_id"] = None
+                    event["top_element_info_points"] = None
                 event.pop("top_element_info")
 
         except IndexError:
