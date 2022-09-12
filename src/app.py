@@ -12,7 +12,7 @@ app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP], use_pages=True)
 app.layout = html.Div(
     [
         dbc.Row(
-            [html.H1("Fantasy Premier League: Player Tabular Statistics")],
+            [html.H1("Fantasy Premier League")],
             style={
                 "text-align": "center",
             },
@@ -20,12 +20,18 @@ app.layout = html.Div(
         dbc.Row(
             [
                 dbc.Navbar(
-                    [dbc.NavItem(dbc.NavLink("Home", href="/"))]
-                    + [
-                        dbc.NavItem(dbc.NavLink(page["name"], href=page["path"]))
+                    [
+                        dbc.NavItem(
+                            dbc.Button(
+                                page["name"],
+                                href=page["path"],
+                                color="secondary",
+                                style={"margin": "0 0 0 10px"},
+                            )
+                        )
                         for page in dash.page_registry.values()
                     ],
-                    style={"align": "center"},
+                    color="light",
                 ),
             ]
         ),
