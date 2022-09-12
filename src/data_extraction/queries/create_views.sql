@@ -1,30 +1,43 @@
-CREATE VIEW PLAYER_TABULAR_VIEW AS
+CREATE VIEW IF NOT EXISTS PLAYER_TABULAR_VIEW AS
 SELECT
     player.web_name,
     position.singular_name_short AS position,
     team.short_name AS team_name,
     player.total_points,
-    player.now_cost*1.0/10 AS now_cost,
+    player.now_cost * 1.0 / 10 AS now_cost,
     player.selected_by_percent,
     player.event_points,
     player.goals_scored,
     player.assists,
     player.goals_scored + player.assists AS goal_contribution,
-    CASE WHEN player.goals_scored=0 THEN 0
-        ELSE ROUND(player.goals_scored*1.0/player.minutes*90,3) 
+    CASE
+        WHEN player.goals_scored = 0 THEN 0
+        ELSE ROUND(
+            player.goals_scored * 1.0 / player.minutes * 90,
+            3
+        )
     END AS goals_per_90,
-    CASE WHEN player.assists=0 THEN 0
-        ELSE ROUND(player.assists*1.0/player.minutes*90,3) 
+    CASE
+        WHEN player.assists = 0 THEN 0
+        ELSE ROUND(player.assists * 1.0 / player.minutes * 90, 3)
     END AS assists_per_90,
-    CASE WHEN player.goals_scored+player.assists = 0 THEN 0
-        ELSE  ROUND((player.goals_scored + player.assists)*1.0/player.minutes*90,3) 
+    CASE
+        WHEN player.goals_scored + player.assists = 0 THEN 0
+        ELSE ROUND(
+            (player.goals_scored + player.assists) * 1.0 / player.minutes * 90,
+            3
+        )
     END AS goal_contribution_per_90,
     player.form,
     player.clean_sheets,
     player.goals_conceded,
-    CASE WHEN player.goals_conceded=0 THEN 0
-        ELSE ROUND(player.goals_conceded*1.0/player.minutes*90,3) 
-    END AS goals_conceded_per_90,   
+    CASE
+        WHEN player.goals_conceded = 0 THEN 0
+        ELSE ROUND(
+            player.goals_conceded * 1.0 / player.minutes * 90,
+            3
+        )
+    END AS goals_conceded_per_90,
     player.own_goals,
     player.penalties_saved,
     player.penalties_missed,
@@ -41,15 +54,16 @@ SELECT
     player.value_form,
     player.value_season,
     player.points_per_game,
-    CASE WHEN player.chance_of_playing_this_round IS NOT NULL THEN player.chance_of_playing_this_round 
-        ELSE 100 
+    CASE
+        WHEN player.chance_of_playing_this_round IS NOT NULL THEN player.chance_of_playing_this_round
+        ELSE 100
     END AS chance_of_playing_this_round
 FROM
     players_static player
     INNER JOIN teams_static team ON player.team = team.id
     INNER JOIN positions_static position ON player.element_type = position.id;
 
-CREATE VIEW CURRENT_GW_VIEW AS
+CREATE VIEW IF NOT EXISTS CURRENT_GW_VIEW AS
 SELECT
     id
 FROM
@@ -57,7 +71,7 @@ FROM
 WHERE
     is_current = 1;
 
-CREATE VIEW NEXT_FIVE_FIXTURES_RAW AS
+CREATE VIEW IF NOT EXISTS NEXT_FIVE_FIXTURES_RAW AS
 SELECT
     fixture.id,
     fixture.event,
@@ -83,7 +97,7 @@ WHERE
 ORDER BY
     event;
 
-CREATE VIEW NEXT_FIVE_FIXTURES_BY_TEAM_VIEW AS
+CREATE VIEW IF NOT EXISTS NEXT_FIVE_FIXTURES_BY_TEAM_VIEW AS
 SELECT
     team.id as team_id,
     v.event,
@@ -92,18 +106,18 @@ SELECT
         ORDER BY
             v.event
     ) AS event_number,
-    case
-        when v.home_team = team.id then 1
-        else 0
-    end as is_home_team,
-    case
-        when team.id = v.home_team then v.home_team_difficulty
-        else v.away_team_difficulty
-    end as fixture_difficulty,
-    case
-        when team.id = v.home_team then v.away_team
-        else v.home_team
-    end as opponent_team
+    CASE
+        WHEN v.home_team = team.id THEN 1
+        ELSE 0
+    END AS is_home_team,
+    CASE
+        WHEN team.id = v.home_team THEN v.home_team_difficulty
+        ELSE v.away_team_difficulty
+    END AS fixture_difficulty,
+    CASE
+        WHEN team.id = v.home_team THEN v.away_team
+        ELSE v.home_team
+    END AS opponent_team
 FROM
     teams_static team
     INNER JOIN NEXT_FIVE_FIXTURES_RAW v ON v.home_team = team.id
