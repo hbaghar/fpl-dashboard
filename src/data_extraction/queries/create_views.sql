@@ -1,5 +1,6 @@
 CREATE VIEW IF NOT EXISTS PLAYER_TABULAR_VIEW AS
 SELECT
+    player.id,
     player.web_name,
     position.singular_name_short AS position,
     team.short_name AS team_name,
@@ -125,3 +126,141 @@ FROM
 ORDER BY
     team.id,
     v.event;
+
+CREATE VIEW IF NOT EXISTS PLAYER_WINDOW_METRICS_VIEW AS
+SELECT
+    player.web_name,
+    player.position,
+    player.team_name,
+    a.*,
+    ROUND(
+        a.cumulative_goals_scored * 1.0 / a.cumulative_minutes * 90,
+        2
+    ) AS cumulative_goals_per_90,
+    ROUND(
+        a.cumulative_assists * 1.0 / a.cumulative_minutes * 90,
+        2
+    ) AS cumulative_assists_per_90,
+    ROUND(
+        a.cumulative_goal_contribution * 1.0 / a.cumulative_minutes * 90,
+        2
+    ) AS cumulative_goal_contribution_per_90
+FROM
+    (
+        SELECT
+            *,
+            SUM(total_points) OVER (
+                PARTITION BY element
+                ORDER BY
+                    round ROWS BETWEEN UNBOUNDED PRECEDING
+                    AND CURRENT ROW
+            ) AS cumulative_points,
+            ROUND(
+                AVG(bonus) OVER (
+                    PARTITION BY element
+                    ORDER BY
+                        round ROWS BETWEEN 5 PRECEDING
+                        AND CURRENT ROW
+                ),
+                1
+            ) AS average_bonus,
+            ROUND(
+                AVG(bps) OVER (
+                    PARTITION BY element
+                    ORDER BY
+                        round ROWS BETWEEN 5 PRECEDING
+                        AND CURRENT ROW
+                ),
+                1
+            ) AS average_bps,
+            SUM(assists) OVER (
+                PARTITION BY element
+                ORDER BY
+                    round ROWS BETWEEN UNBOUNDED PRECEDING
+                    AND CURRENT ROW
+            ) AS cumulative_assists,
+            SUM(clean_sheets) OVER (
+                PARTITION BY element
+                ORDER BY
+                    round ROWS BETWEEN UNBOUNDED PRECEDING
+                    AND CURRENT ROW
+            ) AS cumulative_clean_sheets,
+            SUM(goals_scored) OVER (
+                PARTITION BY element
+                ORDER BY
+                    round ROWS BETWEEN UNBOUNDED PRECEDING
+                    AND CURRENT ROW
+            ) AS cumulative_goals_scored,
+            SUM(goals_conceded) OVER (
+                PARTITION BY element
+                ORDER BY
+                    round ROWS BETWEEN UNBOUNDED PRECEDING
+                    AND CURRENT ROW
+            ) AS cumulative_goals_conceded,
+            SUM(saves) OVER (
+                PARTITION BY element
+                ORDER BY
+                    round ROWS BETWEEN UNBOUNDED PRECEDING
+                    AND CURRENT ROW
+            ) AS cumulative_saves,
+            ROUND(
+                AVG(influence) OVER (
+                    PARTITION BY element
+                    ORDER BY
+                        round ROWS BETWEEN 5 PRECEDING
+                        AND CURRENT ROW
+                ),
+                1
+            ) AS average_influence,
+            ROUND(
+                AVG(creativity) OVER (
+                    PARTITION BY element
+                    ORDER BY
+                        round ROWS BETWEEN 5 PRECEDING
+                        AND CURRENT ROW
+                ),
+                1
+            ) AS average_creativity,
+            ROUND(
+                AVG(threat) OVER (
+                    PARTITION BY element
+                    ORDER BY
+                        round ROWS BETWEEN 5 PRECEDING
+                        AND CURRENT ROW
+                ),
+                1
+            ) AS average_threat,
+            ROUND(
+                AVG(ict_index) OVER (
+                    PARTITION BY element
+                    ORDER BY
+                        round ROWS BETWEEN 5 PRECEDING
+                        AND CURRENT ROW
+                ),
+                1
+            ) AS average_ict_index,
+            ROUND(
+                AVG(total_points) OVER (
+                    PARTITION BY element
+                    ORDER BY
+                        round ROWS BETWEEN 5 PRECEDING
+                        AND CURRENT ROW
+                ),
+                1
+            ) AS form,
+            SUM(goals_scored + assists) OVER (
+                PARTITION BY element
+                ORDER BY
+                    round ROWS BETWEEN UNBOUNDED PRECEDING
+                    AND CURRENT ROW
+            ) AS cumulative_goal_contribution,
+            SUM(minutes) OVER (
+                PARTITION BY element
+                ORDER BY
+                    round ROWS BETWEEN UNBOUNDED PRECEDING
+                    AND CURRENT ROW
+            ) AS cumulative_minutes
+        FROM
+            player_gw_detailed
+    ) a
+    INNER JOIN PLAYER_TABULAR_VIEW player ON a.element = player.id;
