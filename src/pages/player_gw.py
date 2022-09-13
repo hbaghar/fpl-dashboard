@@ -13,7 +13,12 @@ df = pd.read_sql_query("SELECT * FROM PLAYER_WINDOW_METRICS_VIEW", db.conn)
 dash.register_page(__name__, name="Player GW Statistics")
 
 fig = px.line(
-    x=df["round"], y=df["form"], color=df["web_name"], title="form by Gameweek"
+    df,
+    x="round",
+    y="form",
+    symbol="web_name",
+    color="team_name",
+    title="form by Gameweek",
 )
 
 layout = html.Div(
@@ -77,18 +82,21 @@ layout = html.Div(
 )
 def update_player_gw_graph(metric, team, position, player):
     if player is None or player == []:
-        if team is None or team == []:
-            team = df["team_name"].unique()
         if position is None or position == []:
             position = df["position"].unique()
-        player = df[(df["team_name"].isin(team)) & (df["position"] == position)][
-            "web_name"
-        ].unique()
+        else:
+            position = [position]
+        if team is None or team == []:
+            team = df["team_name"].unique()
+        players = df[(df["team_name"].isin(team)) & (df["position"].isin(position))]
+    else:
+        players = df[(df["web_name"].isin(player))]
     fig = px.line(
-        df[df["web_name"].isin(player)],
+        players,
         x="round",
         y=metric,
-        color="web_name",
+        color="team_name",
+        symbol="web_name",
         title=f"{metric} by Gameweek",
     )
     return fig
@@ -104,9 +112,10 @@ def update_player_dropdown(position, team):
         team = df["team_name"].unique()
     if position is None or position == []:
         position = df["position"].unique()
-
+    else:
+        position = [position]
     return sorted(
-        df[(df["team_name"].isin(team)) & (df["position"] == position)][
+        df[(df["team_name"].isin(team)) & (df["position"].isin(position))][
             "web_name"
         ].unique()
     )
