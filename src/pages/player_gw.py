@@ -22,7 +22,7 @@ fig = px.line(
     y="form",
     symbol="web_name",
     color="team_name",
-    title="form by Gameweek",
+    title=f"{config['gw_column_names']['form']} by Gameweek",
 )
 
 layout = html.Div(
@@ -80,6 +80,13 @@ layout = html.Div(
 )
 
 
+@dash.callback(Output("metric_dropdown", "value"), Input("metric_dropdown", "value"))
+def update_metric_dropdown(metric):
+    if metric is None:
+        metric = "form"
+    return metric
+
+
 @dash.callback(
     Output("player_gw_graph", "figure"),
     Input("metric_dropdown", "value"),
@@ -108,7 +115,7 @@ def update_player_gw_graph(metric, team, position, player):
         y=metric,
         color="team_name",
         symbol="web_name",
-        title=f"{metric} by Gameweek",
+        title=f"{config['gw_column_names'][metric]} by Gameweek",
     )
     return fig
 
