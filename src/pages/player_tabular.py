@@ -64,10 +64,10 @@ layout = html.Div(
                         },
                         columns=[
                             {
-                                "name": config["column_names"][i],
+                                "name": config["static_column_names"][i],
                                 "id": i,
                             }
-                            for i in config["column_names"].keys()
+                            for i in config["static_column_names"].keys()
                         ],
                         css=[{"selector": ".show-hide", "rule": "display: none"}],
                     ),
