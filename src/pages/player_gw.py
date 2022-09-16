@@ -22,6 +22,7 @@ fig = px.line(
     y="form",
     symbol="web_name",
     color="team_name",
+    labels=config["gw_column_names"] | {"round": "Gameweek"},
     title=f"{config['gw_column_names']['form']} by Gameweek",
 )
 
@@ -115,6 +116,7 @@ def update_player_gw_graph(metric, team, position, player):
         y=metric,
         color="team_name",
         symbol="web_name",
+        labels=config["gw_column_names"] | {"round": "Gameweek"},
         title=f"{config['gw_column_names'][metric]} by Gameweek",
     )
     return fig
