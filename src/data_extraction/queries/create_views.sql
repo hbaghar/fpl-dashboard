@@ -159,7 +159,7 @@ FROM
                 AVG(bonus) OVER (
                     PARTITION BY element
                     ORDER BY
-                        round ROWS BETWEEN 5 PRECEDING
+                        round ROWS BETWEEN 4 PRECEDING
                         AND CURRENT ROW
                 ),
                 1
@@ -168,7 +168,7 @@ FROM
                 AVG(bps) OVER (
                     PARTITION BY element
                     ORDER BY
-                        round ROWS BETWEEN 5 PRECEDING
+                        round ROWS BETWEEN 4 PRECEDING
                         AND CURRENT ROW
                 ),
                 1
@@ -207,7 +207,7 @@ FROM
                 AVG(influence) OVER (
                     PARTITION BY element
                     ORDER BY
-                        round ROWS BETWEEN 5 PRECEDING
+                        round ROWS BETWEEN 4 PRECEDING
                         AND CURRENT ROW
                 ),
                 1
@@ -216,7 +216,7 @@ FROM
                 AVG(creativity) OVER (
                     PARTITION BY element
                     ORDER BY
-                        round ROWS BETWEEN 5 PRECEDING
+                        round ROWS BETWEEN 4 PRECEDING
                         AND CURRENT ROW
                 ),
                 1
@@ -225,7 +225,7 @@ FROM
                 AVG(threat) OVER (
                     PARTITION BY element
                     ORDER BY
-                        round ROWS BETWEEN 5 PRECEDING
+                        round ROWS BETWEEN 4 PRECEDING
                         AND CURRENT ROW
                 ),
                 1
@@ -234,7 +234,7 @@ FROM
                 AVG(ict_index) OVER (
                     PARTITION BY element
                     ORDER BY
-                        round ROWS BETWEEN 5 PRECEDING
+                        round ROWS BETWEEN 4 PRECEDING
                         AND CURRENT ROW
                 ),
                 1
@@ -243,7 +243,7 @@ FROM
                 AVG(total_points) OVER (
                     PARTITION BY element
                     ORDER BY
-                        round ROWS BETWEEN 5 PRECEDING
+                        round ROWS BETWEEN 4 PRECEDING
                         AND CURRENT ROW
                 ),
                 1
