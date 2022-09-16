@@ -1,14 +1,18 @@
 from re import I
 import dash
-from dash import Dash, dcc, html, dash_table, Input, Output
+from dash import Dash, dcc, html, Input, Output
 import dash_bootstrap_components as dbc
 from src.data_extraction import db_handler as dbh
 import plotly.express as px
+from yaml import safe_load
 import pandas as pd
 
 db = dbh.DBHandler()
 
 df = pd.read_sql_query("SELECT * FROM PLAYER_WINDOW_METRICS_VIEW", db.conn)
+
+with open("src/utils/config.yml", "r") as yaml_file:
+    config = safe_load(yaml_file)
 
 dash.register_page(__name__, name="Player GW Statistics")
 
@@ -35,7 +39,10 @@ layout = html.Div(
                         html.H5("Select Metric"),
                         dcc.Dropdown(
                             id="metric_dropdown",
-                            options=db.get_table_columns("player_window_metrics_view"),
+                            options=[
+                                {"label": value, "value": key}
+                                for key, value in config["gw_column_names"].items()
+                            ],
                             value="form",
                         ),
                         html.H5("Select Position"),
@@ -81,16 +88,20 @@ layout = html.Div(
     Input("player_dropdown", "value"),
 )
 def update_player_gw_graph(metric, team, position, player):
+    if position is None or position == []:
+        position = df["position"].unique()
+    else:
+        position = [position]
+    if team is None or team == []:
+        team = df["team_name"].unique()
     if player is None or player == []:
-        if position is None or position == []:
-            position = df["position"].unique()
-        else:
-            position = [position]
-        if team is None or team == []:
-            team = df["team_name"].unique()
         players = df[(df["team_name"].isin(team)) & (df["position"].isin(position))]
     else:
-        players = df[(df["web_name"].isin(player))]
+        players = df[
+            (df["web_name"].isin(player))
+            & (df["position"].isin(position))
+            & (df["team_name"].isin(team))
+        ]
     fig = px.line(
         players,
         x="round",
