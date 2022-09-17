@@ -75,6 +75,17 @@ layout = html.Div(
                             ),
                             multi=True,
                         ),
+                        html.I(
+                            [
+                                html.B("Note:"),
+                                html.Br(),
+                                "• When no player is selected, top 10 players are shown for the selected metric and current GW by default",
+                                html.Br(),
+                                "• Moving Averages are calculated over the last 5 GWs",
+                                html.Br(),
+                                "• Cumulative metrics are calculated over the entire season",
+                            ]
+                        ),
                     ],
                     width=2,
                     style={"border": "1px solid #f1f6ff", "padding": "5px"},
@@ -107,13 +118,16 @@ def update_player_gw_graph(metric, team, position, player):
     if team is None or team == []:
         team = df["team_name"].unique()
     if player is None or player == []:
-        players = df[(df["team_name"].isin(team)) & (df["position"].isin(position))]
+        df1 = df[(df["position"].isin(position)) & (df["team_name"].isin(team))]
+        df1 = df1.sort_values(by=["round", metric], ascending=False)
+        player = df1["id"].unique()[:10]
     else:
-        players = df[
-            (df["web_name"].isin(player))
-            & (df["position"].isin(position))
-            & (df["team_name"].isin(team))
-        ]
+        player = df[df.web_name.isin(player)]["id"].unique()
+    players = df[
+        (df["id"].isin(player))
+        & (df["position"].isin(position))
+        & (df["team_name"].isin(team))
+    ]
     fig = px.line(
         players,
         x="round",
