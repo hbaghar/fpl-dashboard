@@ -1,5 +1,5 @@
 ---
-column_names:
+static_column_names:
   {
     "web_name": "Player Name",
     "position": "Position",
@@ -39,6 +39,33 @@ column_names:
     "opponent_3": "Next Fixture 3",
     "opponent_4": "Next Fixture 4",
     "opponent_5": "Next Fixture 5",
+  }
+
+gw_column_names:
+  {
+    "total_points": "Round Points",
+    "transfers_balance": "Net transfers",
+    "transfers_in": "Transfers In",
+    "transfers_out": "Transfers Out",
+    "value": "Price",
+    "cumulative_points": "Cumulative Points",
+    "average_bonus": "Moving Average: Bonus Points",
+    "average_bps": "Moving Average: BPS",
+    "cumulative_assists": "Cumulative Assists",
+    "cumulative_clean_sheets": "Cumulative Clean Sheets",
+    "cumulative_goals_scored": "Cumulative Goals Scored",
+    "cumulative_goals_conceded": "Cumulative Goals Conceded",
+    "cumulative_saves": "Cumulative Saves",
+    "average_influence": "Moving Average: Influence",
+    "average_creativity": "Moving Average: Creativity",
+    "average_threat": "Moving Average: Threat",
+    "average_ict_index": "Moving Average: ICT Index",
+    "form": "Moving Average: Form",
+    "cumulative_goal_contribution": "Cumualtive Goal Contribution",
+    "cumulative_minutes": "Cumulative Minutes Played",
+    "cumulative_goals_per_90": "Cumulative Goals Scored/90 min",
+    "cumulative_assists_per_90": "Cumulative Assists/90 min",
+    "cumulative_goal_contribution_per_90": "Cumulative Goal Contribution/90 min",
   }
 
 all_players_hidden_columns:
