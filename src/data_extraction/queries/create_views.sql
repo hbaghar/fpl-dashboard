@@ -129,6 +129,7 @@ ORDER BY
 
 CREATE VIEW IF NOT EXISTS PLAYER_WINDOW_METRICS_VIEW AS
 SELECT
+    player.id,
     player.web_name,
     player.position,
     player.team_name,

@@ -20,10 +20,14 @@ fig = px.line(
     df,
     x="round",
     y="form",
-    symbol="web_name",
-    color="team_name",
-    labels=config["gw_column_names"] | {"round": "Gameweek"},
+    color="id",
+    markers=True,
+    labels=config["gw_column_names"]
+    | {"round": "Gameweek", "id": "Player", "team_name": "Team"},
     title=f"{config['gw_column_names']['form']} by Gameweek",
+)
+fig.for_each_trace(
+    lambda t: t.update(name=df.loc[df.id.astype(str) == t.name, "web_name"].iloc[0])
 )
 
 layout = html.Div(
@@ -114,10 +118,14 @@ def update_player_gw_graph(metric, team, position, player):
         players,
         x="round",
         y=metric,
-        color="team_name",
-        symbol="web_name",
-        labels=config["gw_column_names"] | {"round": "Gameweek"},
+        color="id",
+        markers=True,
+        labels=config["gw_column_names"]
+        | {"round": "Gameweek", "id": "Player", "team_name": "Team"},
         title=f"{config['gw_column_names'][metric]} by Gameweek",
+    )
+    fig.for_each_trace(
+        lambda t: t.update(name=df.loc[df.id.astype(str) == t.name, "web_name"].iloc[0])
     )
     return fig
 
