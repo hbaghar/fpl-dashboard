@@ -110,37 +110,3 @@ gkp_hidden_columns:
     "penalties_missed",
   ]
 position_options: ["All", "GKP", "DEF", "MID", "FWD"]
-
-numeric_column_names_scatter:
-  {
-    "total_points": "Total Points",
-    "form": "Form",
-    "now_cost": "Current Price",
-    "selected_by_percent": "Selected by %",
-    "event_points": "Round Points",
-    "goals_scored": "Goals",
-    "assists": "Assists",
-    "goal_contribution": "Goals+Assists",
-    "goals_per_90": "Goals/90 min",
-    "assists_per_90": "Assists/90 min",
-    "goal_contribution_per_90": "G+A/90 min",
-    "clean_sheets": "Clean Sheets",
-    "penalties_missed": "Penalties Missed",
-    "goals_conceded": "Goals Conceded",
-    "goals_conceded_per_90": "Goals Conceded/90 min",
-    "own_goals": "Own Goals",
-    "penalties_saved": "Penalties Saved",
-    "saves": "Saves",
-    "value_form": "Points/Form",
-    "value_season": "Points/Million",
-    "points_per_game": "Points/Game",
-    "bonus": "Bonus Points",
-    "bps": "BPS",
-    "influence": "Influence",
-    "creativity": "Creativity",
-    "threat": "Threat",
-    "ict_index": "ICT Index",
-    "yellow_cards": "Yellow Cards",
-    "red_cards": "Red Cards",
-    "minutes": "Minutes Played",
-  }

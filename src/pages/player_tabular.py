@@ -62,8 +62,10 @@ layout = html.Div(
                                             for i in config[
                                                 "static_column_names"
                                             ].keys()
+                                            if i
+                                            not in ["web_name", "team_name", "position"]
                                         ],
-                                        value="team_name",
+                                        value="ict_index",
                                     ),
                                 ]
                             ),
@@ -82,6 +84,8 @@ layout = html.Div(
                                             for i in config[
                                                 "static_column_names"
                                             ].keys()
+                                            if i
+                                            not in ["web_name", "team_name", "position"]
                                         ],
                                         value="total_points",
                                     ),
@@ -100,8 +104,10 @@ layout = html.Div(
                                                 "value": i,
                                             }
                                             for i in config[
-                                                "numeric_column_names_scatter"
+                                                "static_column_names"
                                             ].keys()
+                                            if i
+                                            not in ["web_name", "team_name", "position"]
                                         ],
                                         value="form",
                                     ),
@@ -268,20 +274,35 @@ def update_scatter(
     Input("team_dropdown", "value"),
     Input("minutes_played_slider", "value"),
     Input("price_range_slider", "value"),
+    Input("scatter", "relayoutData"),
+    Input("x_axis", "value"),
+    Input("y_axis", "value"),
 )
 def update_player_table(
     position_dropdown_value,
     team_dropdown_value,
     minutes_played_slider_value,
     price_range_slider_value,
+    relayoutData,
+    x_axis,
+    y_axis,
 ):
-    hide_cols = config["all_players_hidden_columns"]
+
     dff = filter_df(
         position_dropdown_value,
         team_dropdown_value,
         minutes_played_slider_value,
         price_range_slider_value,
     )
+    if relayoutData and "xaxis.range[0]" in relayoutData:
+        # Filtering dataframe based on current zoom
+        dff = dff[
+            (dff[x_axis] >= relayoutData["xaxis.range[0]"])
+            & (dff[x_axis] <= relayoutData["xaxis.range[1]"])
+            & (dff[y_axis] >= relayoutData["yaxis.range[0]"])
+            & (dff[y_axis] <= relayoutData["yaxis.range[1]"])
+        ]
+    hide_cols = config["all_players_hidden_columns"]
     if position_dropdown_value != None:
         hide_cols = (
             hide_cols + config[str.lower(position_dropdown_value) + "_hidden_columns"]
@@ -317,7 +338,19 @@ def filter_df(
     Output("team_dropdown", "value"),
     Output("minutes_played_slider", "value"),
     Output("price_range_slider", "value"),
+    Output("scatter", "relayoutData"),
     Input("reset_button", "n_clicks"),
 )
 def reset_filters(n_clicks):
-    return None, [], [0, df.minutes.max()], [df.now_cost.min(), df.now_cost.max()]
+    return (
+        None,
+        [],
+        [0, df.minutes.max()],
+        [df.now_cost.min(), df.now_cost.max()],
+        {
+            "xaxis.autorange": True,
+            "xaxis.showspikes": False,
+            "yaxis.autorange": True,
+            "yaxis.showspikes": False,
+        },
+    )
