@@ -299,7 +299,10 @@ def update_player_table(
         dff = dff[
             (dff[x_axis] >= relayoutData["xaxis.range[0]"])
             & (dff[x_axis] <= relayoutData["xaxis.range[1]"])
-            & (dff[y_axis] >= relayoutData["yaxis.range[0]"])
+        ]
+    if relayoutData and "yaxis.range[0]" in relayoutData:
+        dff = dff[
+            (dff[y_axis] >= relayoutData["yaxis.range[0]"])
             & (dff[y_axis] <= relayoutData["yaxis.range[1]"])
         ]
     hide_cols = config["all_players_hidden_columns"]
