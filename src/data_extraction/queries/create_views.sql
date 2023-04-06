@@ -10,7 +10,7 @@ SELECT
     player.event_points,
     player.goals_scored,
     player.assists,
-    player.goals_scored + player.assists AS goal_involvement,
+    player.goals_scored + player.assists AS goal_involvements,
     CASE
         WHEN player.goals_scored = 0 THEN 0
         ELSE ROUND(
@@ -28,7 +28,7 @@ SELECT
             (player.goals_scored + player.assists) * 1.0 / player.minutes * 90,
             3
         )
-    END AS goal_involvement_per_90,
+    END AS goal_involvements_per_90,
     player.form,
     player.clean_sheets,
     player.goals_conceded,
@@ -152,9 +152,9 @@ SELECT
         2
     ) AS cumulative_assists_per_90,
     ROUND(
-        a.cumulative_goal_involvement * 1.0 / a.cumulative_minutes * 90,
+        a.cumulative_goal_involvements * 1.0 / a.cumulative_minutes * 90,
         2
-    ) AS cumulative_goal_involvement_per_90
+    ) AS cumulative_goal_involvements_per_90
 FROM
     (
         SELECT
@@ -299,7 +299,7 @@ FROM
                 ORDER BY
                     round ROWS BETWEEN UNBOUNDED PRECEDING
                     AND CURRENT ROW
-            ) AS cumulative_goal_involvement,
+            ) AS cumulative_goal_involvements,
             SUM(minutes) OVER (
                 PARTITION BY element
                 ORDER BY
