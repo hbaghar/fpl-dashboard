@@ -10,7 +10,7 @@ SELECT
     player.event_points,
     player.goals_scored,
     player.assists,
-    player.goals_scored + player.assists AS goal_contribution,
+    player.goals_scored + player.assists AS goal_involvement,
     CASE
         WHEN player.goals_scored = 0 THEN 0
         ELSE ROUND(
@@ -28,7 +28,7 @@ SELECT
             (player.goals_scored + player.assists) * 1.0 / player.minutes * 90,
             3
         )
-    END AS goal_contribution_per_90,
+    END AS goal_involvement_per_90,
     player.form,
     player.clean_sheets,
     player.goals_conceded,
@@ -39,6 +39,15 @@ SELECT
             3
         )
     END AS goals_conceded_per_90,
+    -- include xg stats from players_static
+    player.expected_assists,
+    player.expected_goals,
+    player.expected_goal_involvements,
+    player.expected_goals_conceded,
+    player.expected_assists_per_90,
+    player.expected_goals_per_90,
+    player.expected_goal_involvements_per_90,
+    player.expected_goals_conceded_per_90,
     player.own_goals,
     player.penalties_saved,
     player.penalties_missed,
@@ -143,9 +152,9 @@ SELECT
         2
     ) AS cumulative_assists_per_90,
     ROUND(
-        a.cumulative_goal_contribution * 1.0 / a.cumulative_minutes * 90,
+        a.cumulative_goal_involvement * 1.0 / a.cumulative_minutes * 90,
         2
-    ) AS cumulative_goal_contribution_per_90
+    ) AS cumulative_goal_involvement_per_90
 FROM
     (
         SELECT
@@ -241,6 +250,42 @@ FROM
                 1
             ) AS average_ict_index,
             ROUND(
+                AVG(expected_assists) OVER (
+                    PARTITION BY element
+                    ORDER BY
+                        round ROWS BETWEEN 4 PRECEDING
+                        AND CURRENT ROW
+                ),
+                2
+            ) AS average_xa,
+            ROUND(
+                AVG(expected_goals_conceded) OVER (
+                    PARTITION BY element
+                    ORDER BY
+                        round ROWS BETWEEN 4 PRECEDING
+                        AND CURRENT ROW
+                ),
+                2
+            ) AS average_xgc,
+            ROUND(
+                AVG(expected_goals) OVER (
+                    PARTITION BY element
+                    ORDER BY
+                        round ROWS BETWEEN 4 PRECEDING
+                        AND CURRENT ROW
+                ),
+                2
+            ) AS average_xg,
+            ROUND(
+                AVG(expected_goal_involvements) OVER (
+                    PARTITION BY element
+                    ORDER BY
+                        round ROWS BETWEEN 4 PRECEDING
+                        AND CURRENT ROW
+                ),
+                2
+            ) AS average_xgi,
+            ROUND(
                 AVG(total_points) OVER (
                     PARTITION BY element
                     ORDER BY
@@ -254,13 +299,45 @@ FROM
                 ORDER BY
                     round ROWS BETWEEN UNBOUNDED PRECEDING
                     AND CURRENT ROW
-            ) AS cumulative_goal_contribution,
+            ) AS cumulative_goal_involvement,
             SUM(minutes) OVER (
                 PARTITION BY element
                 ORDER BY
                     round ROWS BETWEEN UNBOUNDED PRECEDING
                     AND CURRENT ROW
-            ) AS cumulative_minutes
+            ) AS cumulative_minutes,
+             ROUND(SUM(expected_assists) OVER (
+                PARTITION BY element
+                ORDER BY
+                    round ROWS BETWEEN UNBOUNDED PRECEDING
+                    AND CURRENT ROW
+                ),
+                2
+            ) AS cumulative_xa,
+            ROUND(SUM(expected_goals) OVER (
+                PARTITION BY element
+                ORDER BY
+                    round ROWS BETWEEN UNBOUNDED PRECEDING
+                    AND CURRENT ROW
+                ),
+                2
+            ) AS cumulative_xg,
+            ROUND(SUM(expected_goal_involvements) OVER (
+                PARTITION BY element
+                ORDER BY
+                    round ROWS BETWEEN UNBOUNDED PRECEDING
+                    AND CURRENT ROW
+                ),
+                2
+            ) AS cumulative_xgi,
+            ROUND(SUM(expected_goals_conceded) OVER (
+                PARTITION BY element
+                ORDER BY
+                    round ROWS BETWEEN UNBOUNDED PRECEDING
+                    AND CURRENT ROW
+                ),
+                2
+            ) AS cumulative_xgc
         FROM
             player_gw_detailed
     ) a
