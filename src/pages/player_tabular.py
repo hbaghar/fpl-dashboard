@@ -63,9 +63,19 @@ layout = html.Div(
                                                 "static_column_names"
                                             ].keys()
                                             if i
-                                            not in ["web_name", "team_name", "position"]
+                                            not in [
+                                                "web_name",
+                                                "team_name",
+                                                "position",
+                                                "opponent_1",
+                                                "opponent_2",
+                                                "opponent_3",
+                                                "opponent_4",
+                                                "opponent_5",
+                                            ]
                                         ],
-                                        value="ict_index",
+                                        value="expected_goal_involvements",
+                                        clearable=False,
                                     ),
                                 ]
                             ),
@@ -85,9 +95,19 @@ layout = html.Div(
                                                 "static_column_names"
                                             ].keys()
                                             if i
-                                            not in ["web_name", "team_name", "position"]
+                                            not in [
+                                                "web_name",
+                                                "team_name",
+                                                "position",
+                                                "opponent_1",
+                                                "opponent_2",
+                                                "opponent_3",
+                                                "opponent_4",
+                                                "opponent_5",
+                                            ]
                                         ],
-                                        value="total_points",
+                                        value="goal_involvements",
+                                        clearable=False,
                                     ),
                                 ]
                             ),
@@ -124,9 +144,6 @@ layout = html.Div(
                                 },
                                 sort_action="native",
                                 sort_mode="single",
-                                sort_by=[
-                                    {"column_id": "total_points", "direction": "desc"}
-                                ],
                                 fixed_columns={"headers": True, "data": 3},
                                 style_cell={"minWidth": "150px", "maxWidth": "180px"},
                                 style_data_conditional=styles_fixtures,
@@ -270,6 +287,7 @@ def update_scatter(
 @dash.callback(
     Output("player_table", "data"),
     Output("player_table", "hidden_columns"),
+    Output("player_table", "sort_by"),
     Input("position_dropdown", "value"),
     Input("team_dropdown", "value"),
     Input("minutes_played_slider", "value"),
@@ -311,7 +329,11 @@ def update_player_table(
             hide_cols + config[str.lower(position_dropdown_value) + "_hidden_columns"]
         )
 
-    return dff.to_dict("records"), hide_cols
+    return (
+        dff.to_dict("records"),
+        hide_cols,
+        [{"column_id": y_axis, "direction": "desc"}],
+    )
 
 
 def filter_df(
