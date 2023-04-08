@@ -74,6 +74,8 @@ def top_players_graph(value):
         db.conn,
     )
     db.conn.close()
+
+    config = load_config()
     fig = px.bar(
         data_frame=df.sort_values(by=score_var, ascending=True),
         y="web_name",
@@ -86,7 +88,7 @@ def top_players_graph(value):
         orientation="h",
         labels={
             "web_name": "Player",
-            "total_points": "Round Points",
+            score_var: config["static_column_names"][score_var],
             "team_name": "Team",
         },
         title=f"Top performers this {value.lower()}",
@@ -97,3 +99,9 @@ def top_players_graph(value):
     fig.for_each_annotation(lambda t: t.update(text=t.text.split("=")[-1]))
     fig.update_yaxes(matches=None, showticklabels=True, title=None)
     return fig
+
+
+def load_config():
+    with open("src/utils/config.yml", "r") as f:
+        config = safe_load(f)
+    return config
