@@ -18,7 +18,7 @@ dependencies:
   - bottleneck=1.3.5
   - brotli-python=1.0.9
   - brotlipy=0.7.0
-  - ca-certificates=2022.12.7
+  - ca-certificates
   - certifi=2022.12.7
   - cffi=1.15.1
   - charset-normalizer=2.0.4
