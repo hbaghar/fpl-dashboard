@@ -40,19 +40,17 @@ jobs:
         activate-environment: fpl-db-py39
         miniconda-version: "latest"
         channels: conda-forge,defaults
-    - run: |- 
-          conda search ca-certificates
-#         environment-file: environment.yml
-#         auto-activate-base: false
-#         use-only-tar-bz2: true
-#     - name: Run db update
-#       run: |-
-#         pip install -e .
-#         python3 src/data_extraction/db_handler.py
-#         git config --global user.name ${{secrets.USER_NAME}}
-#         git config --global user.email ${{secrets.USER_EMAIL}}
-#         git add .
-#         git commit -m "Updating SQLite database"
-#         git push
+        environment-file: environment.yml
+        auto-activate-base: false
+        use-only-tar-bz2: true
+    - name: Run db update
+      run: |-
+        pip install -e .
+        python3 src/data_extraction/db_handler.py
+        git config --global user.name ${{secrets.USER_NAME}}
+        git config --global user.email ${{secrets.USER_EMAIL}}
+        git add .
+        git commit -m "Updating SQLite database"
+        git push
         
       
