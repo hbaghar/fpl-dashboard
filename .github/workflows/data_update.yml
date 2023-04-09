@@ -44,7 +44,9 @@ jobs:
         auto-activate-base: false
         use-only-tar-bz2: true
     - name: Run db update
+      shell: bash
       run: |-
+        conda init bash
         conda activate fpl-db-py39
         pip install -e .
         python3 src/data_extraction/db_handler.py
