@@ -35,7 +35,7 @@ jobs:
           ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{
           hashFiles('environment.yml') }}
     - name: Conda env setup
-      uses : conda-incubator/setup-minocnda@v2
+      uses : conda-incubator/setup-miniconda@v2
       with:
         activate-environment: fpl-db-py39
         environment-file: environment.yml
