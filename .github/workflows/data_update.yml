@@ -20,6 +20,9 @@ jobs:
   update:
     # The type of runner that the job will run on
     runs-on: macos-latest
+    defaults:
+      run:
+        shell: bash -el {0}
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -44,14 +47,10 @@ jobs:
         auto-activate-base: false
         use-only-tar-bz2: true
     - name: Run db update
-      shell: bash
       run: |-
-        conda init bash
         conda activate fpl-db-py39
         pip install -e .
         python3 src/data_extraction/db_handler.py
-        git config --global user.name ${{secrets.USER_NAME}}
-        git config --global user.email ${{secrets.USER_EMAIL}}
         git add .
         git commit -m "Updating SQLite database"
         git push
