@@ -38,6 +38,7 @@ jobs:
       uses : conda-incubator/setup-miniconda@v2
       with:
         activate-environment: fpl-db-py39
+        miniconda-version: "latest"
         environment-file: environment.yml
         auto-activate-base: false
         use-only-tar-bz2: true
