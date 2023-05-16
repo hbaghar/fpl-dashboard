@@ -4,26 +4,18 @@ Working with Fantasy Premier League API to create a better player statistics vie
 
 This repository contains code to load data from the FPL API into a SQLite Database and visualize and explore it using Dash
 
+The app is live at: https://fpl-dashboard.onrender.com
 ## Steps to run the app locally
 
 1. Clone this repo
 2. Navigate to root directory of repo
-
-3. Setup `miniconda` environment from `environment.yml` file by running (requires [`miniconda`](https://docs.conda.io/en/latest/miniconda.html) installation):
-
-    ```{bash}
-    conda env create -f environment.yml
-    conda activate fpl-db-py39
-    ```
-
-4. Run the following to make all modules discoverable:
+3. Run the following
 
    ```{bash}
-    pip install -e .
+    pip install -r requirements.txt && pip install -e .
    ```
 
-5. Run the app:
-
+4. Run the app:
     ```{bash}
-    python3 src/app.py
+    gunicorn --chdir src app:server
     ```
