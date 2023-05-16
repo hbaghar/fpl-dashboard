@@ -6,8 +6,10 @@ import pandas as pd
 from yaml import safe_load
 from src.data_extraction import db_handler as dbh
 from src.utils import data_table_module as dtm
+import os
 
-app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP], use_pages=True)
+pages_folder=os.path.join(os.path.dirname(__name__), "pages")
+app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP], use_pages=True, pages_folder=pages_folder)
 server = app.server
 
 app.layout = html.Div(
