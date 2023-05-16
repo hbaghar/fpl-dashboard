@@ -4,7 +4,7 @@ Working with Fantasy Premier League API to create a better player statistics vie
 
 This repository contains code to load data from the FPL API into a SQLite Database and visualize and explore it using Dash
 
-## Steps to run the app
+## Steps to run the app locally
 
 1. Clone this repo
 2. Navigate to root directory of repo
@@ -22,13 +22,7 @@ This repository contains code to load data from the FPL API into a SQLite Databa
     pip install -e .
    ```
 
-5. Fetch data from FPL API by running:
-
-    ```{bash}
-    python3 src/data_extraction/db_handler.py
-    ```
-
-6. Run the app:
+5. Run the app:
 
     ```{bash}
     python3 src/app.py
