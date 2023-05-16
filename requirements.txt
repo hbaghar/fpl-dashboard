@@ -9,4 +9,3 @@ setuptools==67.7.2
 tqdm==4.64.0
 gunicorn
 dash-tools
-sqlite3
