@@ -11,7 +11,7 @@ db = dbh.DBHandler()
 
 dash.register_page(__name__, name="Player Overall Statistics")
 
-with open("src/utils/config.yml", "r") as yaml_file:
+with open("utils/config.yml", "r") as yaml_file:
     config = safe_load(yaml_file)
 
 fixtures_flat = dtm.load_fixtures(db)
@@ -21,24 +21,24 @@ df = players.merge(fixtures_flat, how="inner", left_on="team_name", right_on="te
 df = dtm.format_name_by_availability(df)
 
 
-styles_fixtures = dtm.discrete_background_color_bins(
-    df,
-    columns_to_color=[
-        "opponent_1",
-        "opponent_2",
-        "opponent_3",
-        "opponent_4",
-        "opponent_5",
-    ],
-    columns=[
-        "fixture_difficulty_1",
-        "fixture_difficulty_2",
-        "fixture_difficulty_3",
-        "fixture_difficulty_4",
-        "fixture_difficulty_5",
-    ],
-    reverse=True,
-)
+# styles_fixtures = dtm.discrete_background_color_bins(
+#     df,
+#     columns_to_color=[
+#         "opponent_1",
+#         "opponent_2",
+#         "opponent_3",
+#         "opponent_4",
+#         "opponent_5",
+#     ],
+#     columns=[
+#         "fixture_difficulty_1",
+#         "fixture_difficulty_2",
+#         "fixture_difficulty_3",
+#         "fixture_difficulty_4",
+#         "fixture_difficulty_5",
+#     ],
+#     reverse=True,
+# )
 
 layout = html.Div(
     [
@@ -146,7 +146,7 @@ layout = html.Div(
                                 sort_mode="single",
                                 fixed_columns={"headers": True, "data": 3},
                                 style_cell={"minWidth": "150px", "maxWidth": "180px"},
-                                style_data_conditional=styles_fixtures,
+                                # style_data_conditional=styles_fixtures,
                                 style_header={
                                     "backgroundColor": "#f1f6ff",
                                     "fontWeight": "bold",

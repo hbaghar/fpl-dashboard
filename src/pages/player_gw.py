@@ -11,7 +11,7 @@ db = dbh.DBHandler()
 
 df = pd.read_sql_query("SELECT * FROM PLAYER_WINDOW_METRICS_VIEW", db.conn)
 
-with open("src/utils/config.yml", "r") as yaml_file:
+with open("utils/config.yml", "r") as yaml_file:
     config = safe_load(yaml_file)
 
 dash.register_page(__name__, name="Player GW Statistics")

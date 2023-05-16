@@ -102,6 +102,6 @@ def top_players_graph(value):
 
 
 def load_config():
-    with open("src/utils/config.yml", "r") as f:
+    with open("utils/config.yml", "r") as f:
         config = safe_load(f)
     return config
