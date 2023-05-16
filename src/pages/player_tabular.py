@@ -265,7 +265,8 @@ def update_scatter(
         y=y_axis,
         color="id",
         size=bubble_size,
-        labels=config["static_column_names"] | {"id": "Player"},
+        labels=config["static_column_names"] | {"id": "Player ID", "web_name": "Name", "team_name": "Team", "position": "Position"},
+        hover_data=['web_name', 'team_name', 'position']
     )
     fig.update_layout(
         title=f"{config['static_column_names'][y_axis]} by {config['static_column_names'][x_axis]}",

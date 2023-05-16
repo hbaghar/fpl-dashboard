@@ -135,7 +135,8 @@ def update_player_gw_graph(metric, team, position, player):
         color="id",
         markers=True,
         labels=config["gw_column_names"]
-        | {"round": "Gameweek", "id": "Player", "team_name": "Team"},
+        | {"round": "Gameweek", "id": "Player ID", "team_name": "Team", "web_name": "Name", "position": "Position"},
+        hover_data=["web_name", "team_name", "position"],
         title=f"{config['gw_column_names'][metric]} by Gameweek",
     )
     fig.for_each_trace(
