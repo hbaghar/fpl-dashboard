@@ -8,6 +8,7 @@ from src.data_extraction import db_handler as dbh
 from src.utils import data_table_module as dtm
 
 app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP], use_pages=True)
+server = app.server
 
 app.layout = html.Div(
     [
