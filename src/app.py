@@ -9,7 +9,8 @@ from src.utils import data_table_module as dtm
 import os
 
 pages_folder=os.path.join(os.path.dirname(__name__), "pages")
-app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP], use_pages=True, pages_folder=pages_folder)
+print(pages_folder)
+app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP], use_pages=True, routes_pathname_prefix="/", name=__name__, pages_folder=pages_folder)
 server = app.server
 
 app.layout = html.Div(
@@ -45,4 +46,4 @@ app.layout = html.Div(
 
 if __name__ == "__main__":
     # dbh.build_db_tables()
-    app.run_server(debug=True)
+    app.run_server()
