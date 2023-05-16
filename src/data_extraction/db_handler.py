@@ -11,7 +11,7 @@ class DBHandler:
     Class with methods to create a database and perform operations on it
     """
 
-    def __init__(self, db_name="data/FPL_DB.db"):
+    def __init__(self, db_name="../data/FPL_DB.db"):
         self.db_name = db_name
         self.conn = sql.connect(self.db_name)
         self.cursor = self.conn.cursor()
