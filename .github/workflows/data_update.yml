@@ -51,6 +51,7 @@ jobs:
           pip install -e .
           cd src/
           python3 data_extraction/db_handler.py
+          cd ..
           git add .
           git commit -m "Updating SQLite database"
           git push
