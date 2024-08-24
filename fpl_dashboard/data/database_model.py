@@ -1,8 +1,8 @@
-from pydantic import BaseModel, Field
+from sqlmodel import SQLModel, Field, Column, JSON, PrimaryKeyConstraint, create_engine
 from typing import List, Optional
 
-class Event(BaseModel):
-    id: int
+class Event(SQLModel, table=True):
+    id: int = Field(primary_key=True)
     name: str
     deadline_time: str
     average_entry_score: int
@@ -15,20 +15,23 @@ class Event(BaseModel):
     is_previous: bool
     is_current: bool
     is_next: bool
-    chip_plays: List[dict]
+    # chip_plays: List[dict] = Field(default=[], sa_type=Column(JSON))
     most_selected: Optional[int]
     most_transferred_in: Optional[int]
     top_element: Optional[int]
-    top_element_info: Optional[dict]
+    # top_element_info: Optional[dict] = Field(default_factory={}, sa_type=Column(JSON))
     transfers_made: int
     most_captained: Optional[int]
     most_vice_captained: Optional[int]
 
-class Team(BaseModel):
+    class Config:
+        arbitrary_types_allowed = True
+
+class Team(SQLModel, table=True):
     code: int
     draw: int
     form: Optional[str]
-    id: int
+    id: int = Field(primary_key=True)
     loss: int
     name: str
     played: int
@@ -47,7 +50,7 @@ class Team(BaseModel):
     strength_defence_away: int
     pulse_id: int
 
-class Element(BaseModel):
+class Element(SQLModel, table=True):
     chance_of_playing_next_round: Optional[int]
     chance_of_playing_this_round: Optional[int]
     code: int
@@ -62,7 +65,7 @@ class Element(BaseModel):
     event_points: int
     first_name: str
     form: str
-    id: int
+    id: int = Field(primary_key=True)
     in_dreamteam: bool
     news: str
     news_added: Optional[str]
@@ -137,8 +140,8 @@ class Element(BaseModel):
     starts_per_90: float
     clean_sheets_per_90: float
 
-class ElementType(BaseModel):
-    id: int
+class ElementType(SQLModel, table=True):
+    id: int = Field(primary_key=True)
     plural_name: str
     plural_name_short: str
     singular_name: str
@@ -149,18 +152,21 @@ class ElementType(BaseModel):
     squad_min_select: Optional[int]=None
     squad_max_select: Optional[int]=None
     ui_shirt_specific: bool
-    sub_positions_locked: List[int]
+    # sub_positions_locked: List[int] = Field(default_factory=list, sa_type=Column(JSON))
     element_count: int
 
-class ElementStat(BaseModel):
+    class Config:
+        arbitrary_types_allowed = True
+    
+class ElementStat(SQLModel, table=False):
     name: str
     label: str
 
-class Fixture(BaseModel):
+class Fixture(SQLModel, table=True):
     team_h: int
     team_a: int
     event: Optional[int]
-    id: int
+    id: int = Field(primary_key=True)
     team_h_difficulty: int
     team_a_difficulty: int
     kickoff_time: str
@@ -175,7 +181,7 @@ class Fixture(BaseModel):
     started: bool
     provisional_start_time: bool
 
-class PlayerHistory(BaseModel):
+class PlayerHistory(SQLModel, table=True):
     element: int
     fixture: int
     opponent_team: int
@@ -213,7 +219,11 @@ class PlayerHistory(BaseModel):
     expected_goals_conceded: float
     starts: int
 
-class PlayerFixture(BaseModel):
+    # define a primary key based on element and fixture
+    __table_args__ = (PrimaryKeyConstraint('element', 'fixture'),)
+
+class PlayerFixture(SQLModel, table=True):
+    uid: Optional[int] = Field(default=None, primary_key=True)
     id: int
     code: int
     team_h: int
@@ -229,14 +239,14 @@ class PlayerFixture(BaseModel):
     is_home: bool
     difficulty: int
 
-class ManagerPick(BaseModel):
+class ManagerPick(SQLModel, table=False):
     element: int
     position: int
     multiplier: int
     is_captain: bool
     is_vice_captain: bool
 
-class ManagerInfo(BaseModel):
+class ManagerInfo(SQLModel, table=False):
     id: int
     joined_time: str
     started_event: int
@@ -261,12 +271,22 @@ class ManagerInfo(BaseModel):
     last_deadline_total_transfers: int
     years_active: int
 
-class StaticData(BaseModel):
+class StaticData(SQLModel, table=False):
     events: List[Event]
     teams: List[Team]
     elements: List[Element]
     element_types: List[ElementType]
     element_stats: List[ElementStat]
 
-class ManagerSquad(BaseModel):
+class ManagerSquad(SQLModel, table=False):
     picks: List[ManagerPick]
+
+def create_db_and_tables():
+    db_filename = "fpl_dashboard.db"
+    db_url = f"sqlite:///{db_filename}"
+
+    engine = create_engine(db_url, echo=True)
+    SQLModel.metadata.create_all(engine)
+
+if __name__ == "__main__":
+    create_db_and_tables()

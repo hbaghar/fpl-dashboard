@@ -1,6 +1,13 @@
 import requests
 from enum import Enum
-from pydantic_models import *
+from database_model import *
+from tqdm import tqdm
+import typing
+from multiprocessing import Pool
+from functools import partial
+from sqlmodel import Session, create_engine, select
+if typing.TYPE_CHECKING:
+    from .database_model import *
 
 class FPLAPIEndpoint(Enum):
     BOOTSTRAP_STATIC = "bootstrap-static/"
@@ -16,7 +23,10 @@ class FPLAPIHandler:
     def _make_request(self, method, endpoint, **kwargs):
         url = self.base_url + endpoint
         response = requests.request(method, url, **kwargs)
-        return response.json()
+        try:
+            return response.json()
+        except:
+            raise ValueError(f"Invalid response from FPL API: {url}, {response.text}")
 
     def get_json_data(self, endpoint, **kwargs):
         return self._make_request("GET", endpoint, **kwargs)
@@ -64,46 +74,44 @@ class FPLAPIHandler:
         endpoint = FPLAPIEndpoint.ENTRY.value + f"{manager_id}/"
         data = self.get_json_data(endpoint, **kwargs)
         return ManagerInfo.model_validate(data)
+    
+    def get_player_data(self, element):
+        try:
+            player_history = self.get_player_info(element.id, "history")
+            player_fixtures = self.get_player_info(element.id, "fixtures")
+        except:
+            print(f"Failed to get player data for element id {element.id}")
+        return player_history, player_fixtures
 
 if __name__ == "__main__":
-    fpl_handler = FPLAPIHandler()
-    # print("Getting static data...")
-    # print("\tGetting events...")
-    # static_data = fpl_handler.get_static_data("events")
-    # print("Static data:", static_data)
+    create_db_and_tables()
+    engine = create_engine("sqlite:///fpl_dashboard.db", echo=True)
+    api = FPLAPIHandler()
 
-    # print("\tGetting teams...")
-    # static_data = fpl_handler.get_static_data("teams")
-    # print("Static data:", static_data)
+    elements = api.get_static_data("elements")
+    teams = api.get_static_data("teams")
+    element_types = api.get_static_data("element_types")
+    element_stats = api.get_static_data("element_stats")
+    fixtures = api.get_fixtures()
+    
+    player_history = []
+    player_fixtures = []
+    
+    with Pool(16) as p:
+        with tqdm(total=len(elements), desc="Retrieving player gameweek data") as pbar:
+            for i, data in enumerate(
+                p.imap(api.get_player_data, elements)
+            ):
+                player_history.extend(data[0])
+                player_fixtures.extend(data[1])
+                pbar.update()
 
-    print("\tGetting players...")
-    static_data = fpl_handler.get_static_data("elements")
-    print("Static data:", static_data)
+    with Session(engine) as session:
+        session.add_all(elements)
+        session.add_all(teams)
+        session.add_all(element_types)
+        session.add_all(fixtures)
+        session.add_all(player_history)
+        session.add_all(player_fixtures)
 
-    # print("\tGetting player types...")
-    # static_data = fpl_handler.get_static_data("element_types")
-    # print("Static data:", static_data)
-
-    # print("\tGetting element stats...")
-    # static_data = fpl_handler.get_static_data("element_stats")
-    # print("Static data:", static_data)
-
-    # print("Getting fixtures...")
-    # fixtures = fpl_handler.get_fixtures()
-    # print("Fixtures:", fixtures)
-
-    # print("Getting player history info...")
-    # player_info = fpl_handler.get_player_info(1, "history")
-    # print("Player info:", player_info)
-
-    # print("Getting player fixture info...")
-    # player_fixture_info = fpl_handler.get_player_info(1, "fixtures")
-    # print("Player fixture info:", player_fixture_info)
-
-    # print("Getting manager squad...")
-    # manager_squad = fpl_handler.get_manager_squad(1, 1)
-    # print("Manager squad:", manager_squad)
-
-    # print("Getting manager info...")
-    # manager_info = fpl_handler.get_manager_info(1)
-    # print("Manager info:", manager_info)
+        session.commit()
