@@ -83,10 +83,16 @@ class FPLAPIHandler:
             print(f"Failed to get player data for element id {element.id}")
         return player_history, player_fixtures
 
-if __name__ == "__main__":
-    create_db_and_tables()
+
+def populate_db():
+    import os
     engine = create_engine("sqlite:///fpl_dashboard.db", echo=True)
     api = FPLAPIHandler()
+
+    if os.path.exists("fpl_dashboard.db"):
+        os.remove("fpl_dashboard.db")
+    
+    create_db_and_tables()
 
     elements = api.get_static_data("elements")
     teams = api.get_static_data("teams")
@@ -115,3 +121,11 @@ if __name__ == "__main__":
         session.add_all(player_fixtures)
 
         session.commit()
+
+if __name__ == "__main__":
+    populate_db()
+
+    engine = create_engine("sqlite:///fpl_dashboard.db", echo=True)
+    with Session(engine) as session:
+        mosalah = session.exec(select(Element).where(Element.second_name == "Salah")).one()
+        print(mosalah.player_team.short_name, mosalah.player_position.singular_name_short, mosalah.points_per_game, mosalah.player_history)

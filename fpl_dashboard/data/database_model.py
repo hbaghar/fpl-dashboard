@@ -1,4 +1,4 @@
-from sqlmodel import SQLModel, Field, Column, JSON, PrimaryKeyConstraint, create_engine
+from sqlmodel import SQLModel, Field, Column, JSON, PrimaryKeyConstraint, create_engine, Relationship
 from typing import List, Optional
 
 class Event(SQLModel, table=True):
@@ -24,8 +24,6 @@ class Event(SQLModel, table=True):
     most_captained: Optional[int]
     most_vice_captained: Optional[int]
 
-    class Config:
-        arbitrary_types_allowed = True
 
 class Team(SQLModel, table=True):
     code: int
@@ -50,6 +48,8 @@ class Team(SQLModel, table=True):
     strength_defence_away: int
     pulse_id: int
 
+    team_players: List["Element"] = Relationship(back_populates="player_team")
+
 class Element(SQLModel, table=True):
     chance_of_playing_next_round: Optional[int]
     chance_of_playing_this_round: Optional[int]
@@ -59,7 +59,7 @@ class Element(SQLModel, table=True):
     cost_change_start: int
     cost_change_start_fall: int
     dreamteam_count: int
-    element_type: int
+    element_type: int = Field(foreign_key='elementtype.id')
     ep_next: str
     ep_this: str
     event_points: int
@@ -77,7 +77,7 @@ class Element(SQLModel, table=True):
     special: bool
     squad_number: Optional[int]
     status: str
-    team: int
+    team: int = Field(foreign_key='team.id')
     team_code: int
     total_points: int
     transfers_in: int
@@ -105,10 +105,10 @@ class Element(SQLModel, table=True):
     threat: str
     ict_index: str
     starts: int
-    expected_goals: str
-    expected_assists: str
-    expected_goal_involvements: str
-    expected_goals_conceded: str
+    expected_goals: float
+    expected_assists: float
+    expected_goal_involvements: float
+    expected_goals_conceded: float
     influence_rank: int
     influence_rank_type: int
     creativity_rank: int
@@ -140,6 +140,10 @@ class Element(SQLModel, table=True):
     starts_per_90: float
     clean_sheets_per_90: float
 
+    player_team: Team = Relationship(back_populates="team_players")
+    player_position: "ElementType" = Relationship(back_populates="players")
+    player_history: List["PlayerHistory"] = Relationship(back_populates="player_profile")
+
 class ElementType(SQLModel, table=True):
     id: int = Field(primary_key=True)
     plural_name: str
@@ -155,8 +159,8 @@ class ElementType(SQLModel, table=True):
     # sub_positions_locked: List[int] = Field(default_factory=list, sa_type=Column(JSON))
     element_count: int
 
-    class Config:
-        arbitrary_types_allowed = True
+    players: List["Element"] = Relationship(back_populates="player_position")
+
     
 class ElementStat(SQLModel, table=False):
     name: str
@@ -182,7 +186,7 @@ class Fixture(SQLModel, table=True):
     provisional_start_time: bool
 
 class PlayerHistory(SQLModel, table=True):
-    element: int
+    element: int = Field(foreign_key='element.id')
     fixture: int
     opponent_team: int
     total_points: int
@@ -204,11 +208,11 @@ class PlayerHistory(SQLModel, table=True):
     saves: int
     bonus: int
     bps: int
-    influence: str
-    creativity: str
-    threat: str
-    ict_index: str
-    value: int
+    influence: float
+    creativity: float
+    threat: float
+    ict_index: float
+    value: float
     transfers_balance: int
     selected: int
     transfers_in: int
@@ -221,6 +225,7 @@ class PlayerHistory(SQLModel, table=True):
 
     # define a primary key based on element and fixture
     __table_args__ = (PrimaryKeyConstraint('element', 'fixture'),)
+    player_profile: "Element" = Relationship(back_populates="player_history")
 
 class PlayerFixture(SQLModel, table=True):
     uid: Optional[int] = Field(default=None, primary_key=True)
