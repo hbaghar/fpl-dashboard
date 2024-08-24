@@ -78,10 +78,9 @@ class FPLAPIHandler:
     def get_player_data(self, element):
         try:
             player_history = self.get_player_info(element.id, "history")
-            player_fixtures = self.get_player_info(element.id, "fixtures")
         except:
             print(f"Failed to get player data for element id {element.id}")
-        return player_history, player_fixtures
+        return player_history
 
 
 def populate_db():
@@ -94,31 +93,29 @@ def populate_db():
     
     create_db_and_tables()
 
+    events = api.get_static_data("events")
     elements = api.get_static_data("elements")
     teams = api.get_static_data("teams")
     element_types = api.get_static_data("element_types")
-    element_stats = api.get_static_data("element_stats")
     fixtures = api.get_fixtures()
     
     player_history = []
-    player_fixtures = []
     
     with Pool(16) as p:
         with tqdm(total=len(elements), desc="Retrieving player gameweek data") as pbar:
-            for i, data in enumerate(
+            for _, data in enumerate(
                 p.imap(api.get_player_data, elements)
             ):
-                player_history.extend(data[0])
-                player_fixtures.extend(data[1])
+                player_history.extend(data)
                 pbar.update()
 
     with Session(engine) as session:
+        session.add_all(events)
         session.add_all(elements)
         session.add_all(teams)
         session.add_all(element_types)
         session.add_all(fixtures)
         session.add_all(player_history)
-        session.add_all(player_fixtures)
 
         session.commit()
 
@@ -128,4 +125,4 @@ if __name__ == "__main__":
     engine = create_engine("sqlite:///fpl_dashboard.db", echo=True)
     with Session(engine) as session:
         mosalah = session.exec(select(Element).where(Element.second_name == "Salah")).one()
-        print(mosalah.player_team.short_name, mosalah.player_position.singular_name_short, mosalah.points_per_game, mosalah.player_history)
+        print(mosalah.player_team.short_name, mosalah.player_position.singular_name_short, mosalah.points_per_game, mosalah.goal_involvements_per_90)

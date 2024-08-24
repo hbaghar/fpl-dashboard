@@ -1,4 +1,5 @@
 from sqlmodel import SQLModel, Field, Column, JSON, PrimaryKeyConstraint, create_engine, Relationship
+from pydantic import computed_field
 from typing import List, Optional
 
 class Event(SQLModel, table=True):
@@ -28,7 +29,7 @@ class Event(SQLModel, table=True):
 class Team(SQLModel, table=True):
     code: int
     draw: int
-    form: Optional[str]
+    form: Optional[float]
     id: int = Field(primary_key=True)
     loss: int
     name: str
@@ -64,16 +65,16 @@ class Element(SQLModel, table=True):
     ep_this: str
     event_points: int
     first_name: str
-    form: str
+    form: float
     id: int = Field(primary_key=True)
     in_dreamteam: bool
     news: str
     news_added: Optional[str]
     now_cost: int
     photo: str
-    points_per_game: str
+    points_per_game: float
     second_name: str
-    selected_by_percent: str
+    selected_by_percent: float
     special: bool
     squad_number: Optional[int]
     status: str
@@ -84,8 +85,8 @@ class Element(SQLModel, table=True):
     transfers_in_event: int
     transfers_out: int
     transfers_out_event: int
-    value_form: str
-    value_season: str
+    value_form: float
+    value_season: float
     web_name: str
     minutes: int
     goals_scored: int
@@ -100,10 +101,10 @@ class Element(SQLModel, table=True):
     saves: int
     bonus: int
     bps: int
-    influence: str
-    creativity: str
-    threat: str
-    ict_index: str
+    influence: float
+    creativity: float
+    threat: float
+    ict_index: float
     starts: int
     expected_goals: float
     expected_assists: float
@@ -143,6 +144,27 @@ class Element(SQLModel, table=True):
     player_team: Team = Relationship(back_populates="team_players")
     player_position: "ElementType" = Relationship(back_populates="players")
     player_history: List["PlayerHistory"] = Relationship(back_populates="player_profile")
+
+    @computed_field
+    @property
+    def goals_per_90(self) -> float:
+        if self.minutes == 0:
+            return 0
+        return self.goals_scored / self.minutes * 90
+    
+    @computed_field
+    @property
+    def assists_per_90(self) -> float:
+        if self.minutes == 0:
+            return 0
+        return self.assists / self.minutes * 90
+    
+    @computed_field
+    @property
+    def goal_involvements_per_90(self) -> float:
+        if self.minutes == 0:
+            return 0
+        return (self.goals_scored + self.assists) / self.minutes * 90
 
 class ElementType(SQLModel, table=True):
     id: int = Field(primary_key=True)
@@ -188,7 +210,7 @@ class Fixture(SQLModel, table=True):
 class PlayerHistory(SQLModel, table=True):
     element: int = Field(foreign_key='element.id')
     fixture: int
-    opponent_team: int
+    opponent_team: int = Field(foreign_key='team.id')
     total_points: int
     was_home: bool
     kickoff_time: str
@@ -227,8 +249,7 @@ class PlayerHistory(SQLModel, table=True):
     __table_args__ = (PrimaryKeyConstraint('element', 'fixture'),)
     player_profile: "Element" = Relationship(back_populates="player_history")
 
-class PlayerFixture(SQLModel, table=True):
-    uid: Optional[int] = Field(default=None, primary_key=True)
+class PlayerFixture(SQLModel, table=False):
     id: int
     code: int
     team_h: int
