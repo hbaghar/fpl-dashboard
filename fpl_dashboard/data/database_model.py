@@ -2,6 +2,7 @@ from sqlmodel import SQLModel, Field, Column, JSON, PrimaryKeyConstraint, create
 from pydantic import computed_field
 from typing import List, Optional, NamedTuple
 from enum import Enum
+import numpy as np
 
 class Event(SQLModel, table=True):
     id: int = Field(primary_key=True)
@@ -66,7 +67,7 @@ def calculate_home_away_stats(games: List["PlayerHistory"], is_home: bool, per_9
     filtered_games = [g for g in games if g.was_home == is_home and g.minutes > 0]
     minutes = sum(g.minutes for g in filtered_games)
     if minutes == 0:
-        return PlayerStats(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+        return PlayerStats(0.0, 0.0, 0.0, 0.0, 0.0)
 
     points = sum(g.total_points for g in filtered_games)
     goal_involvements = sum(g.goals_scored + g.assists for g in filtered_games)
@@ -211,7 +212,7 @@ class Element(SQLModel, table=True):
 
         team_total_pts = sum([p.total_points for p in team])
 
-        return round(self.total_points / team_total_pts * 100, 2)
+        return round(self.total_points / team_total_pts * 100, 2) if team_total_pts > 0 else 0
     
     @computed_field
     @property
@@ -220,7 +221,21 @@ class Element(SQLModel, table=True):
 
         team_total_goal_involvements = sum([p.goal_involvements for p in team])
 
-        return round(self.goal_involvements / team_total_goal_involvements * 100,2)
+        return round(self.goal_involvements / team_total_goal_involvements * 100,2) if team_total_goal_involvements > 0 else 0
+    
+    @computed_field
+    @property
+    def consistency_factor(self) -> float:
+        matches = self.player_history
+        std_pts = np.std([m.total_points for m in matches])
+        mean_pts = np.mean([m.total_points for m in matches])
+
+        return mean_pts / (std_pts+10)
+    
+    @computed_field
+    @property
+    def points_adjusted_for_consistency(self) -> float:
+        return self.total_points * (1+self.consistency_factor)
     
     @computed_field
     @property
@@ -229,7 +244,7 @@ class Element(SQLModel, table=True):
         home_games = [g for g in games if g.was_home and g.minutes > 0]
         wins = [g for g in home_games if g.fixture_outcome == FixtureOutcome.WIN]
 
-        return round(len(wins) / len(home_games) * 100, 2)
+        return round(len(wins) / len(home_games) * 100, 2) if len(home_games) > 0 else 0
     
     @computed_field
     @property
@@ -238,7 +253,7 @@ class Element(SQLModel, table=True):
         away_games = [g for g in games if not g.was_home and g.minutes > 0]
         wins = [g for g in away_games if g.fixture_outcome == FixtureOutcome.WIN]
 
-        return round(len(wins) / len(away_games) * 100, 2)
+        return round(len(wins) / len(away_games) * 100, 2) if len(away_games) > 0 else 0
     
     @computed_field
     @property

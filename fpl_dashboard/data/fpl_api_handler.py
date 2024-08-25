@@ -1,13 +1,16 @@
 import requests
 from enum import Enum
-from database_model import *
+from fpl_dashboard.data.database_model import *
 from tqdm import tqdm
 import typing
 from multiprocessing import Pool
-from functools import partial
 from sqlmodel import Session, create_engine, select
-if typing.TYPE_CHECKING:
-    from .database_model import *
+
+__all__ = (
+    "FPLAPIHandler",
+    "FPLAPIEndpoint",
+    "populate_db",
+)
 
 class FPLAPIEndpoint(Enum):
     BOOTSTRAP_STATIC = "bootstrap-static/"
