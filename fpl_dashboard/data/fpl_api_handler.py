@@ -1,10 +1,12 @@
-import requests
-from enum import Enum
-from fpl_dashboard.data.database_model import *
-from tqdm import tqdm
 import typing
+from enum import Enum
 from multiprocessing import Pool
+
+import requests
 from sqlmodel import Session, create_engine, select
+from tqdm import tqdm
+
+from fpl_dashboard.data.database_model import *
 
 __all__ = (
     "FPLAPIHandler",
@@ -12,12 +14,14 @@ __all__ = (
     "populate_db",
 )
 
+
 class FPLAPIEndpoint(Enum):
     BOOTSTRAP_STATIC = "bootstrap-static/"
     FIXTURES = "fixtures/"
     ELEMENT_SUMMARY = "element-summary/"
     ENTRY = "entry/"
     PICKS = "entry/{manager_id}/event/{gw}/picks/"
+
 
 class FPLAPIHandler:
     def __init__(self, base_url="https://fantasy.premierleague.com/api/"):
@@ -50,7 +54,7 @@ class FPLAPIHandler:
             return ElementStat
         else:
             raise ValueError(f"Invalid key: {key}")
-    
+
     def get_static_data(self, key, **kwargs):
         data = self.get_json_data(FPLAPIEndpoint.BOOTSTRAP_STATIC.value, **kwargs)
         return_type = self.get_return_type_for_static_data(key)
@@ -77,7 +81,7 @@ class FPLAPIHandler:
         endpoint = FPLAPIEndpoint.ENTRY.value + f"{manager_id}/"
         data = self.get_json_data(endpoint, **kwargs)
         return ManagerInfo.model_validate(data)
-    
+
     def get_player_data(self, element):
         try:
             player_history = self.get_player_info(element.id, "history")
@@ -88,12 +92,13 @@ class FPLAPIHandler:
 
 def populate_db():
     import os
+
     engine = create_engine("sqlite:///fpl_dashboard.db", echo=True)
     api = FPLAPIHandler()
 
     if os.path.exists("fpl_dashboard.db"):
         os.remove("fpl_dashboard.db")
-    
+
     create_db_and_tables()
 
     events = api.get_static_data("events")
@@ -101,14 +106,12 @@ def populate_db():
     teams = api.get_static_data("teams")
     element_types = api.get_static_data("element_types")
     fixtures = api.get_fixtures()
-    
+
     player_history = []
-    
+
     with Pool(16) as p:
         with tqdm(total=len(elements), desc="Retrieving player gameweek data") as pbar:
-            for _, data in enumerate(
-                p.imap(api.get_player_data, elements)
-            ):
+            for _, data in enumerate(p.imap(api.get_player_data, elements)):
                 player_history.extend(data)
                 pbar.update()
 
@@ -122,11 +125,18 @@ def populate_db():
 
         session.commit()
 
+
 if __name__ == "__main__":
     populate_db()
 
     engine = create_engine("sqlite:///fpl_dashboard.db", echo=True)
     with Session(engine) as session:
-        mosalah = session.exec(select(Element).where(Element.second_name == "Salah")).one()
-        print(mosalah.player_team.short_name, mosalah.player_position.singular_name_short,
-              mosalah.away_stats, mosalah.away_stats_per_90)
+        mosalah = session.exec(
+            select(Element).where(Element.second_name == "Salah")
+        ).one()
+        print(
+            mosalah.player_team.short_name,
+            mosalah.player_position.singular_name_short,
+            mosalah.away_stats,
+            mosalah.away_stats_per_90,
+        )
