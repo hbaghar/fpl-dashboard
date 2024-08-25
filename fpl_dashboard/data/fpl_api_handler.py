@@ -125,4 +125,5 @@ if __name__ == "__main__":
     engine = create_engine("sqlite:///fpl_dashboard.db", echo=True)
     with Session(engine) as session:
         mosalah = session.exec(select(Element).where(Element.second_name == "Salah")).one()
-        print(mosalah.player_team.short_name, mosalah.player_position.singular_name_short, mosalah.points_per_game, mosalah.goal_involvements_per_90)
+        print(mosalah.player_team.short_name, mosalah.player_position.singular_name_short,
+              mosalah.away_stats, mosalah.away_stats_per_90)

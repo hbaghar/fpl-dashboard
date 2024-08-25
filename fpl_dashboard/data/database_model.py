@@ -1,6 +1,7 @@
 from sqlmodel import SQLModel, Field, Column, JSON, PrimaryKeyConstraint, create_engine, Relationship
 from pydantic import computed_field
-from typing import List, Optional
+from typing import List, Optional, NamedTuple
+from enum import Enum
 
 class Event(SQLModel, table=True):
     id: int = Field(primary_key=True)
@@ -50,6 +51,38 @@ class Team(SQLModel, table=True):
     pulse_id: int
 
     team_players: List["Element"] = Relationship(back_populates="player_team")
+
+from typing import List, NamedTuple
+from collections import namedtuple
+
+class PlayerStats(NamedTuple):
+    points: float
+    goal_involvements: float
+    xgi: float
+    goals_conceded: float
+    xgc: float
+
+def calculate_home_away_stats(games: List["PlayerHistory"], is_home: bool, per_90: bool = False) -> PlayerStats:
+    filtered_games = [g for g in games if g.was_home == is_home and g.minutes > 0]
+    minutes = sum(g.minutes for g in filtered_games)
+    if minutes == 0:
+        return PlayerStats(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+
+    points = sum(g.total_points for g in filtered_games)
+    goal_involvements = sum(g.goals_scored + g.assists for g in filtered_games)
+    xgi = sum(g.expected_goal_involvements for g in filtered_games)
+    goals_conceded = sum(g.goals_conceded for g in filtered_games)
+    xgc = sum(g.expected_goals_conceded for g in filtered_games)
+
+    if per_90:
+        points = points / minutes * 90
+        goal_involvements = goal_involvements / minutes * 90
+        xgi = xgi / minutes * 90
+        goals_conceded = goals_conceded / minutes * 90
+        xgc = xgc / minutes * 90
+    
+    return PlayerStats(points, goal_involvements, xgi, goals_conceded, xgc)
+
 
 class Element(SQLModel, table=True):
     chance_of_playing_next_round: Optional[int]
@@ -161,10 +194,71 @@ class Element(SQLModel, table=True):
     
     @computed_field
     @property
+    def goal_involvements(self) -> int:
+        return self.goals_scored + self.assists
+    
+    @computed_field
+    @property
     def goal_involvements_per_90(self) -> float:
         if self.minutes == 0:
             return 0
-        return (self.goals_scored + self.assists) / self.minutes * 90
+        return self.goal_involvements / self.minutes * 90
+    
+    @computed_field
+    @property
+    def pct_of_team_pts(self) -> float:
+        team = self.player_team.team_players
+
+        team_total_pts = sum([p.total_points for p in team])
+
+        return round(self.total_points / team_total_pts * 100, 2)
+    
+    @computed_field
+    @property
+    def pct_of_team_goal_involvements(self) -> float:
+        team = self.player_team.team_players
+
+        team_total_goal_involvements = sum([p.goal_involvements for p in team])
+
+        return round(self.goal_involvements / team_total_goal_involvements * 100,2)
+    
+    @computed_field
+    @property
+    def home_win_pct(self) -> float:
+        games = self.player_history
+        home_games = [g for g in games if g.was_home and g.minutes > 0]
+        wins = [g for g in home_games if g.fixture_outcome == FixtureOutcome.WIN]
+
+        return round(len(wins) / len(home_games) * 100, 2)
+    
+    @computed_field
+    @property
+    def away_win_pct(self) -> float:
+        games = self.player_history
+        away_games = [g for g in games if not g.was_home and g.minutes > 0]
+        wins = [g for g in away_games if g.fixture_outcome == FixtureOutcome.WIN]
+
+        return round(len(wins) / len(away_games) * 100, 2)
+    
+    @computed_field
+    @property
+    def home_stats(self) -> PlayerStats:
+        return calculate_home_away_stats(self.player_history, is_home=True, per_90=False)
+
+    @computed_field
+    @property
+    def home_stats_per_90(self) -> PlayerStats:
+        return calculate_home_away_stats(self.player_history, is_home=True, per_90=True)
+
+    @computed_field
+    @property
+    def away_stats(self) -> PlayerStats:
+        return calculate_home_away_stats(self.player_history, is_home=False, per_90=False)
+
+    @computed_field
+    @property
+    def away_stats_per_90(self) -> PlayerStats:
+        return calculate_home_away_stats(self.player_history, is_home=False, per_90=True)
 
 class ElementType(SQLModel, table=True):
     id: int = Field(primary_key=True)
@@ -207,6 +301,11 @@ class Fixture(SQLModel, table=True):
     started: bool
     provisional_start_time: bool
 
+
+class FixtureOutcome(Enum):
+    WIN = 3
+    LOSS = 0
+    DRAW = 1
 class PlayerHistory(SQLModel, table=True):
     element: int = Field(foreign_key='element.id')
     fixture: int
@@ -248,6 +347,18 @@ class PlayerHistory(SQLModel, table=True):
     # define a primary key based on element and fixture
     __table_args__ = (PrimaryKeyConstraint('element', 'fixture'),)
     player_profile: "Element" = Relationship(back_populates="player_history")
+    opponent: "Team" = Relationship(sa_relationship_kwargs={"uselist": False})
+
+    @computed_field
+    @property
+    def fixture_outcome(self) -> str:
+        if self.team_h_score == self.team_a_score:
+            return FixtureOutcome.DRAW
+        elif (self.team_h_score > self.team_a_score and self.was_home) or (self.team_h_score < self.team_a_score and not self.was_home):
+            return FixtureOutcome.WIN
+        else:
+            return FixtureOutcome.LOSS
+            
 
 class PlayerFixture(SQLModel, table=False):
     id: int
